@@ -1,13 +1,15 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.Limelight;
 
 public class RobotContainer {
@@ -15,8 +17,10 @@ public class RobotContainer {
   // public final Limelight m_rearCamera;
 
   public final Drivetrain m_drivetrain;
-  // public final Intake m_intake;
-  // public final Shooter m_shooter;
+  public final Intake m_intake;
+  public final Shooter m_shooter;
+
+  public final SendableChooser<Command> m_autoChooser;
 
 
   public final CommandXboxController m_driverController;
@@ -28,9 +32,11 @@ public class RobotContainer {
     // m_rearCamera = new Limelight();
 
     m_drivetrain = new Drivetrain(m_frontCamera);
-    // m_intake = new Intake();
-    // m_shooter = new Shooter();
+    m_intake = new Intake();
+    m_shooter = new Shooter();
 
+    m_autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData(m_autoChooser);
 
     m_driverController = new CommandXboxController(Constants.OIConstants.kDriverControllerPort);
 
@@ -60,6 +66,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return m_autoChooser.getSelected();
   }
 }

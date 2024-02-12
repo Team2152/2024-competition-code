@@ -19,7 +19,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 
 public final class Constants {
-  public static final class Intake {
+  public static final class IntakeConstants {
     public static final int kPivotCanId = 10;
     public static final int kIntakeCanId = 11;
 

@@ -1,34 +1,34 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-package frc.robot.subsystems;
+package frc.robot.subsystems.drivetrain;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.WPIUtilJNI;
-import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.subsystems.Limelight;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -36,6 +36,8 @@ import java.util.function.DoubleSupplier;
 import org.photonvision.EstimatedRobotPose;
 
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -82,22 +84,28 @@ public class Drivetrain extends SubsystemBase {
 
   public Drivetrain(Limelight frontCamera) {
     m_frontCamera = frontCamera;
-    // AutoBuilder.configureHolonomic(
-    //   this::getPose,
-    //   this::resetPose,
-    //   this::getChassisSpeeds,
-    //   this::setChassisSpeeds,
-    //   new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in
-    //     new PIDConstants(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD), // Translation PID constants
-    //     new PIDConstants(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD), // Rotation PID constants
-    //     DriveConstants.kMaxSpeedMetersPerSecond, // Max module speed, in m/s
-    //     (DriveConstants.kWheelBase / 39.37 ) / 2, // Drive base radius in meters. Distance from robot center to furthest module
-    //     new ReplanningConfig() // Default path replanning config. See the API for the options
-    //   // here
-    //   ),
-    //   this // The drive subsystem. Used to properly set the requirements of path following
-    // );
-
+    AutoBuilder.configureHolonomic(
+      this::getPose,
+      this::resetPose,
+      this::getChassisSpeeds,
+      this::setChassisSpeeds,
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD),
+        new PIDConstants(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD),
+        DriveConstants.kMaxSpeedMetersPerSecond,
+        (DriveConstants.kWheelBase / 39.37 ) / 2,
+        new ReplanningConfig()
+      ),
+      () -> {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      this
+    );
+    
     m_poseEstimator = new SwerveDrivePoseEstimator(
       DriveConstants.kDriveKinematics,
       m_gyro.getRotation2d(),
@@ -108,6 +116,23 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field", m_field);
   }
 
+  public Command followPath(PathPlannerPath path) {
+    return AutoBuilder.followPath(path);
+  }
+
+  public PathPlannerPath createOnTheFlyPath(List<Pose2d> points, double endRotation) {
+     List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+      points
+    );
+
+    PathPlannerPath path = new PathPlannerPath(
+            bezierPoints,
+            new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI),
+            new GoalEndState(0.0, Rotation2d.fromDegrees(endRotation))
+    );
+    path.preventFlipping = true;
+    return path;
+  }
 
   public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
     driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
