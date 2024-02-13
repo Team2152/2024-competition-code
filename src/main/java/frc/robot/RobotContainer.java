@@ -63,6 +63,11 @@ public class RobotContainer {
       .onTrue(
         m_drivetrain.zeroHeading()
     );
+
+    m_driverController.a()
+      .onTrue(
+        m_intake.setIntakeAngle(SmartDashboard.getNumber("Intake Angle Input", 0))
+      );
   }
 
   public Command getAutonomousCommand() {

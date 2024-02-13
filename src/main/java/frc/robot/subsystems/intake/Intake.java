@@ -1,6 +1,8 @@
 package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.StatusSignal;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
@@ -30,11 +32,11 @@ public class Intake extends SubsystemBase {
         return m_intakeRollers.getIntakePower();
     }
 
-    public void setIntakeAngle(double angle) {
-        m_intakePivot.setIntakeAngle(angle);
+    public Command setIntakeAngle(double angle) {
+        return m_intakePivot.setIntakeAngle(angle);
     }
 
-    public void setIntakePower(double power) {
-        m_intakeRollers.setIntakePower(power);
+    public Command setIntakePower(double power) {
+        return m_intakeRollers.setIntakePower(power);
     }
 }
