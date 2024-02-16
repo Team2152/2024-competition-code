@@ -7,11 +7,16 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
@@ -19,15 +24,37 @@ import frc.robot.subsystems.Limelight;
 
 public class ShooterPivot extends SubsystemBase{
     private final TalonFX m_pivotMotor;
-    private final PIDController m_pivotPIDController;
+    private final TalonFXConfiguration m_pivotMotorConfigs;
+    private final MotionMagicVoltage m_request;
 
-    public ShooterPivot(int pivotMotorCanId) {
+    public ShooterPivot(int pivotMotorCanId, double gearRatio) {
         m_pivotMotor = new TalonFX(pivotMotorCanId);
-        m_pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-        m_pivotPIDController = new PIDController(
-            ShooterConstants.kPivotP,
-            ShooterConstants.kPivotI,
-            ShooterConstants.kPivotD);
+
+        m_pivotMotorConfigs = new TalonFXConfiguration();
+        Slot0Configs slot0Configs = m_pivotMotorConfigs.Slot0;
+        slot0Configs.kS = 0.25 * gearRatio; // Add 0.25 V output to overcome static friction
+        slot0Configs.kV = 12.; // A velocity target of 1 rps results in 12.0 V output
+        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
+        slot0Configs.kP = 4.8; // A position error of 2.5 rotations results in 12 V output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0.1; // A velocity error of 1 rps results in 0.1 V output
+        m_pivotMotorConfigs.Feedback.SensorToMechanismRatio = gearRatio;
+        m_pivotMotorConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        MotionMagicConfigs motionMagicConfigs = m_pivotMotorConfigs.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 80 / gearRatio; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 160 / gearRatio; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 1600 / gearRatio; // Target jerk of 1600 rps/s/s (0.1 seconds)
+
+        /* How to tune pivot configs
+         * 
+         * https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html
+         * 
+         * kS = Increase voltage until movement.
+         */
+
+        m_pivotMotor.getConfigurator().apply(m_pivotMotorConfigs);
+        m_request = new MotionMagicVoltage(0); // default pivot position
     } 
 
     @Override
@@ -39,38 +66,21 @@ public class ShooterPivot extends SubsystemBase{
 
     public Command setShooterAngle(double targetAngle) {
         return run(() -> {
-            double intakePivotOutput = m_pivotPIDController.calculate(getShooterAngle().getValueAsDouble(), targetAngle);
-            m_pivotMotor.set(intakePivotOutput);
+            // double intakePivotOutput = m_pivotPIDController.calculate(getShooterAngle().getValueAsDouble(), targetAngle);
+            // m_pivotMotor.set(intakePivotOutput);
+            double intakeTargetPosition = Units.degreesToRotations(targetAngle);
+            m_pivotMotor.setControl(m_request.withPosition(intakeTargetPosition));
         }); 
     }
 
-    public double getNeededShooterAngleFromApriltag(Limelight vision, int apriltagId, Pose2d currentPose, double heightAboveTag) {
-        Optional<EstimatedRobotPose> estPose = vision.getEstimatedPose();
-        if (estPose.isPresent()) {
-            List<PhotonTrackedTarget> targets = vision.result.getTargets();
-            for (PhotonTrackedTarget tgt : targets) {
-                if (tgt.getFiducialId() == apriltagId) {
-                    var tagPose = vision.m_photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
-                    if (tagPose.isPresent()) {
-                        Pose2d tagPose2d = tagPose.get().toPose2d();
-                        double distanceToTarget = tagPose2d.getTranslation().getDistance(currentPose.getTranslation());
-                        double angleToAimRadians = Math.atan2(heightAboveTag, distanceToTarget);
-
-                        double angleToAimDegrees = Math.toDegrees(angleToAimRadians);
-                        setShooterAngle(angleToAimDegrees);
-                            
-                        return angleToAimDegrees;
-                    }
-                }
-            }
-        }
-        return angleToAimDegrees;
-    }
-
-    private double calculateAngleForTarget(double targetHeight, double distance) {
-        final double g = 32.174; // acceleration due to gravity in ft/s^2
-        final double initialHeight = 0.0; // initial height of the projectile (assuming it's launched horizontally)
-        final double initialVelocity = Math.sqrt((distance * g) / (2 * (targetHeight - initialHeight)));
-        return Math.atan((initialVelocity * initialVelocity + Math.sqrt(initialVelocity * initialVelocity * initialVelocity * initialVelocity - g * ((g * distance * distance) + (2 * (targetHeight - initialHeight) * initialVelocity * initialVelocity)))) / (g * distance));
-    }
+    // public Optional<Double> getNeededShooterAngleFromApriltag(Limelight vision, int apriltagId, Pose2d currentPose, double heightAboveTag) {
+    //     PhotonTrackedTarget requestedApriltag = null;
+    //     for (PhotonTrackedTarget i : vision.result.targets) {
+    //         if (i.getFiducialId() == apriltagId) {
+                
+    //             return Optional.of(1.0);
+    //         }
+    //     }
+    //     return Optional.empty();
+    // }
 }

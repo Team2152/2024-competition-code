@@ -26,14 +26,14 @@ public final class Constants {
     public static final boolean kPivotInverted = false;
     public static final IdleMode kIntakeIdleMode = IdleMode.kBrake;
     public static final boolean kIntakeInverted = false;
-
-    // Pivot PID Controller 
-    public static final double kPivotP = 1;
-    public static final double kPivotI = 0;
-    public static final double kPivotD = 0;
     
     // Amp Limit
     public static final int kIntakeAmps = 30;
+
+    public static final int kIntakeNoteLsPort = 1;
+
+    public static final double kIntakeSetpointOut = 90;
+    public static final double kIntakeSetpointIn = 270;
   }
 
   public static final class ShooterConstants {
@@ -43,10 +43,8 @@ public final class Constants {
     public static final int kLeftFeederCanId = 15;
     public static final int kRightFeederCanId = 16;
 
-    // Pivot PID Controller 
-    public static final double kPivotP = 1;
-    public static final double kPivotI = 0;
-    public static final double kPivotD = 0;
+    public static final double kShooterSetpointStow = 90;
+    public static final double kShooterSetpointSpeakerDefault = 120;
   }
 
   public static class Vision {
@@ -161,6 +159,7 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
     public static final double kDriveDeadband = 0.15;
   }
 

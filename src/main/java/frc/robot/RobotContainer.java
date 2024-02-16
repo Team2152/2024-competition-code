@@ -2,14 +2,16 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 
 public class RobotContainer {
@@ -26,6 +28,9 @@ public class RobotContainer {
   public final CommandXboxController m_driverController;
   // public final CommandXboxController m_operatorController;
 
+  public final LEDs m_leds;
+  public final DigitalInput m_intakeLimitSwitch;
+  
 
   public RobotContainer() {
     m_frontCamera = new Limelight(Constants.Vision.kFrontCameraName, Constants.Vision.kRobotToCam);
@@ -35,10 +40,14 @@ public class RobotContainer {
     m_intake = new Intake();
     m_shooter = new Shooter();
 
+    m_leds = new LEDs();
+
     m_autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(m_autoChooser);
 
     m_driverController = new CommandXboxController(Constants.OIConstants.kDriverControllerPort);
+
+    m_intakeLimitSwitch = new DigitalInput(Constants.IntakeConstants.kIntakeNoteLsPort);
 
     configureBindings();
   }
@@ -54,6 +63,10 @@ public class RobotContainer {
         () -> m_driverController.rightBumper().getAsBoolean()
     ));
 
+    new Trigger(m_intakeLimitSwitch::get)
+      .onTrue(m_intake.setIntakeAngle(0), m_leds.setColor()
+    );
+
     m_driverController.leftBumper()
       .whileTrue(
           m_drivetrain.setX()
@@ -66,7 +79,9 @@ public class RobotContainer {
 
     m_driverController.a()
       .onTrue(
-        m_intake.setIntakeAngle(SmartDashboard.getNumber("Intake Angle Input", 0))
+        m_shooter.setShooterAngle(90)
+      ).onFalse(
+        m_shooter.setShooterAngle(0)
       );
   }
 
