@@ -20,7 +20,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 public final class Constants {
   public static final class IntakeConstants {
-    public static final int kPivotCanId = 10;
+    public static final int kPivotCanId = 16;
     public static final int kIntakeCanId = 11;
 
     public static final boolean kPivotInverted = false;
@@ -37,7 +37,7 @@ public final class Constants {
   }
 
   public static final class ShooterConstants {
-    public static final int kPivotCanId = 12;
+    public static final int kPivotCanId = 15;
     public static final int kLeftShooterCanId = 13;
     public static final int kRightShooterCanId = 14;
     public static final int kLeftFeederCanId = 15;

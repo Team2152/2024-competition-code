@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.WPIUtilJNI;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Limelight;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -64,8 +66,7 @@ public class Drivetrain extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
 
-  AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-  private AHRS m_gyro = ahrs;
+  private AHRS m_gyro = new AHRS(SPI.Port.kMXP);
   
   private double m_currentRotation = 0.0;
   private double m_currentTranslationDir = 0.0;
@@ -80,10 +81,10 @@ public class Drivetrain extends SubsystemBase {
 
   private final Field2d m_field = new Field2d();
   
-  private final Limelight m_frontCamera;
+  //private final Limelight m_frontCamera;
 
-  public Drivetrain(Limelight frontCamera) {
-    m_frontCamera = frontCamera;
+  public Drivetrain() {
+    //m_frontCamera = null;
     AutoBuilder.configureHolonomic(
       this::getPose,
       this::resetPose,
@@ -149,21 +150,21 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     m_poseEstimator.update(m_gyro.getRotation2d(), getModulePositions());
 
-    Optional<EstimatedRobotPose> estRobotPose = m_frontCamera.getEstimatedPose();
-    if (estRobotPose.isPresent()) {
-      EstimatedRobotPose estRobotPoseData = estRobotPose.get();
-      Matrix<N3, N1> estStdDevs = m_frontCamera.getEstimationStdDevs(estRobotPose.get().estimatedPose.toPose2d());
-      Pose2d pose = estRobotPoseData.estimatedPose.toPose2d();
-      double timestamp = estRobotPoseData.timestampSeconds;
+    // Optional<EstimatedRobotPose> estRobotPose = m_frontCamera.getEstimatedPose();
+    // if (estRobotPose.isPresent()) {
+    //   EstimatedRobotPose estRobotPoseData = estRobotPose.get();
+    //   Matrix<N3, N1> estStdDevs = m_frontCamera.getEstimationStdDevs(estRobotPose.get().estimatedPose.toPose2d());
+    //   Pose2d pose = estRobotPoseData.estimatedPose.toPose2d();
+    //   double timestamp = estRobotPoseData.timestampSeconds;
 
-      if (pose != lastPose) {
-        m_poseEstimator.addVisionMeasurement(
-          pose,
-          timestamp,
-          estStdDevs
-        );
-      }
-  }
+    //   if (pose != lastPose) {
+    //     m_poseEstimator.addVisionMeasurement(
+    //       pose,
+    //       timestamp,
+    //       estStdDevs
+    //     );
+    //   }
+  
 
     m_field.setRobotPose(getPose());
     SmartDashboard.updateValues();
@@ -330,9 +331,9 @@ public class Drivetrain extends SubsystemBase {
     DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot,
     BooleanSupplier rateLimiter, BooleanSupplier speedLimiter) {
       return run(() -> {
-          double xVal = x.getAsDouble();
-          double yVal = y.getAsDouble();
-          double rotVal = rot.getAsDouble();
+          double xVal = -MathUtil.applyDeadband(x.getAsDouble(), OIConstants.kDriveDeadband);
+          double yVal = -MathUtil.applyDeadband(y.getAsDouble(), OIConstants.kDriveDeadband);
+          double rotVal = -MathUtil.applyDeadband(rot.getAsDouble(), OIConstants.kDriveDeadband);
 
           boolean rateLimiterVal = rateLimiter.getAsBoolean();
           boolean speedLimiterVal = speedLimiter.getAsBoolean();

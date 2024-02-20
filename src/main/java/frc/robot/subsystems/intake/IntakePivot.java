@@ -22,7 +22,8 @@ public class IntakePivot extends SubsystemBase{
 
         m_pivotMotorConfigs = new TalonFXConfiguration();
         Slot0Configs slot0Configs = m_pivotMotorConfigs.Slot0;
-        slot0Configs.kS = 0.25 * gearRatio; // Add 0.25 V output to overcome static friction
+        slot0Configs.kS = 0.5; // Add 0.25 V output to overcome static friction
+        slot0Configs.kG = 0.65; // Gravity :3
         slot0Configs.kV = 0.8; // A velocity target of 1 rps results in 12.0 V output
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
         slot0Configs.kP = 4.8; // A position error of 2.5 rotations results in 12 V output
