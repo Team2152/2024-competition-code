@@ -16,9 +16,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Limelight;
 
@@ -73,14 +75,31 @@ public class ShooterPivot extends SubsystemBase{
         }); 
     }
 
-    // public Optional<Double> getNeededShooterAngleFromApriltag(Limelight vision, int apriltagId, Pose2d currentPose, double heightAboveTag) {
-    //     PhotonTrackedTarget requestedApriltag = null;
-    //     for (PhotonTrackedTarget i : vision.result.targets) {
-    //         if (i.getFiducialId() == apriltagId) {
-                
-    //             return Optional.of(1.0);
-    //         }
-    //     }
-    //     return Optional.empty();
-    // }
+    public Optional<Double> getNeededShooterAngleFromApriltag(Limelight vision, int apriltagId, Pose2d currentPose, double heightAboveTag) {
+        for (PhotonTrackedTarget i : vision.result.targets) {
+            if (i.getFiducialId() == apriltagId) {
+                PhotonTrackedTarget requestedApriltag = i;
+                Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
+
+                double headingToTarget = Math.atan2(
+                    requestedTagPose.getY() - currentPose.getY(),
+                    requestedTagPose.getX() - currentPose.getX()
+                );
+
+                double angleToTarget = Math.atan2(
+                    requestedTagPose.getZ() - ShooterConstants.kShooterHeight,
+                    requestedTagPose.getX() - currentPose.getX()
+                );
+
+                double distanceToTarget = Math.sqrt(
+                    Math.pow(currentPose.getX() - requestedTagPose.getX(), 2) +
+                    Math.pow(currentPose.getY() - requestedTagPose.getY(), 2) +
+                    Math.pow(ShooterConstants.kShooterHeight - requestedTagPose.getZ(), 2)
+                );
+
+                return Optional.of(1.0);
+            }
+        }
+        return Optional.empty();
+    }
 }

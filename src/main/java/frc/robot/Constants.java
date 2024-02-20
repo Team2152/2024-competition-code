@@ -45,6 +45,8 @@ public final class Constants {
 
     public static final double kShooterSetpointStow = 90;
     public static final double kShooterSetpointSpeakerDefault = 120;
+
+    public static final double kShooterHeight = 0.4318;
   }
 
   public static class Vision {
