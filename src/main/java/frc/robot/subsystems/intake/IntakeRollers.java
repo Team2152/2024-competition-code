@@ -22,9 +22,10 @@ public class IntakeRollers extends SubsystemBase {
   public void periodic() {}
 
   public Command setIntakePower(double power) {
-    return run(() -> {
-      m_intakeMotor.set(power);
-    }); 
+    return runEnd(
+      () -> m_intakeMotor.set(power),
+      () -> m_intakeMotor.set(0)
+    ); 
   }
 
   public double getIntakePower() {

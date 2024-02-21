@@ -41,7 +41,6 @@ public class IntakePivot extends SubsystemBase{
          * 
          * https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html
          * 
-         * kS = Increase voltage until movement.
          */
 
         m_pivotMotor.getConfigurator().apply(m_pivotMotorConfigs);

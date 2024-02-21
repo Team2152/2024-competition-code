@@ -1,9 +1,7 @@
 package frc.robot.subsystems.shooter;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -14,7 +12,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;

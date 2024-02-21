@@ -32,8 +32,8 @@ public final class Constants {
 
     public static final int kIntakeNoteLsPort = 1;
 
-    public static final double kIntakeSetpointOut = 90;
-    public static final double kIntakeSetpointIn = 270;
+    public static final double kIntakeSetpointOut = 0;
+    public static final double kIntakeSetpointIn = 90;
   }
 
   public static final class ShooterConstants {
@@ -43,10 +43,11 @@ public final class Constants {
     public static final int kLeftFeederCanId = 15;
     public static final int kRightFeederCanId = 16;
 
-    public static final double kShooterSetpointStow = 90;
-    public static final double kShooterSetpointSpeakerDefault = 120;
+    public static final double kShooterSetpointStow = -90;
+    public static final double kShooterSetpointSpeakerDefault = 55;
 
     public static final double kShooterHeight = 0.4318;
+    public static final boolean kFeederInverted = true;
   }
 
   public static class Vision {
@@ -163,6 +164,9 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
     public static final double kDriveDeadband = 0.15;
+
+    public static final int kLedPort = 0;
+    public static final int kLedLength = 69;
   }
 
   public static final class AutoConstants {
