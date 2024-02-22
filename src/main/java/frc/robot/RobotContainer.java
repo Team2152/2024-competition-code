@@ -24,7 +24,7 @@ public class RobotContainer {
 
 
   public final CommandXboxController m_driverController;
-  //public final CommandXboxController m_operatorController;
+  public final CommandXboxController m_operatorController;
 
   public final LEDs m_leds;
 
@@ -43,7 +43,7 @@ public class RobotContainer {
     SmartDashboard.putData(m_autoChooser);
 
     m_driverController = new CommandXboxController(Constants.OIConstants.kDriverControllerPort);
-    //m_operatorController = new CommandXboxController(1);
+    m_operatorController = new CommandXboxController(1);
 
     configureBindings();
   }
@@ -74,15 +74,14 @@ public class RobotContainer {
     );
 
     m_driverController.y()
-      .toggleOnTrue(
-        m_intake.setIntakeAngle(0)
-      .finallyDo(() -> 
-        m_intake.setIntakeAngle(90)));
+      .onTrue(
+        m_intake.setIntakeAngle(-25))
+          .onFalse( 
+            m_intake.setIntakeAngle(120));
 
     m_driverController.a()
       .whileTrue(
-        m_intake.setIntakePower(1)
-          .until(() -> m_intake.getNoteDetected())
+        m_intake.setIntakePowerWithChecks(1)
       );
 
     m_driverController.b()
@@ -91,8 +90,18 @@ public class RobotContainer {
       );
 
     m_driverController.x()
-      .onTrue(m_shooter.setFeederPower(1))
+      .onTrue(m_shooter.setFeederPower(-0.5))
       .onFalse(m_shooter.setFeederPower(0));
+
+    m_driverController.povUp()
+      .onTrue(m_shooter.setShooterPower(1))
+      .onFalse(m_shooter.setShooterPower(0));
+
+    m_driverController.povDown()
+      .onTrue(m_shooter.setShooterAngle(67.8));
+
+    m_driverController.povLeft()
+      .onTrue(m_shooter.setShooterAngle(0));
 
   //   m_operatorController.a()
   //     .onTrue(m_intake.setIntakePower(-1))
@@ -101,6 +110,28 @@ public class RobotContainer {
   //   m_operatorController.b()
   //     .onTrue(m_shooter.setShooterPower(1))
   //     .onFalse(m_shooter.setShooterPower(0));
+
+  m_operatorController.rightBumper()
+  .onTrue(m_intake.setIntakePower(1))
+  .onFalse(m_intake.setIntakePower(0));
+  
+  m_operatorController.leftBumper()
+  .onTrue(m_intake.setIntakePower(-1))
+  .onFalse(m_intake.setIntakePower(0));
+  
+  m_operatorController.a()
+    .onTrue(
+      m_intake.setIntakeAngle(-25))
+        .onFalse( 
+          m_intake.setIntakeAngle(120));
+
+  m_operatorController.y()
+    .onTrue(m_shooter.setFeederPower(-0.5))
+    .onFalse(m_shooter.setFeederPower(0))
+    .onTrue(m_shooter.setShooterPower(1))
+    .onFalse(m_shooter.setShooterPower(0));
+
+
   }
 
   public Command getAutonomousCommand() {

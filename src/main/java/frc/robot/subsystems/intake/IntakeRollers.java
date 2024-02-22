@@ -28,6 +28,21 @@ public class IntakeRollers extends SubsystemBase {
     ); 
   }
 
+  public Command setIntakePowerConstant(double power) {
+    return run(
+      () -> m_intakeMotor.set(power)
+    ); 
+  }
+
+  public Command setIntakePowerWithChecks(double power, boolean note) {
+    return runEnd(
+      () -> {
+        if (note) {m_intakeMotor.set(power);}
+      },
+      () -> m_intakeMotor.set(0)
+    ); 
+  }
+
   public double getIntakePower() {
     return m_intakeMotor.get();
   }

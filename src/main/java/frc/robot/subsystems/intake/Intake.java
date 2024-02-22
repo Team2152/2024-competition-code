@@ -52,4 +52,12 @@ public class Intake extends SubsystemBase {
     public Command setIntakePower(double power) {
         return m_intakeRollers.setIntakePower(power);
     }
+
+    public Command setIntakePowerWithChecks(double power) {
+        return m_intakeRollers.setIntakePowerWithChecks(power, getNoteDetected());
+    }
+
+    public Command setIntakePowerConstant(double power) {
+        return m_intakeRollers.setIntakePowerConstant(power);
+    }
 }
