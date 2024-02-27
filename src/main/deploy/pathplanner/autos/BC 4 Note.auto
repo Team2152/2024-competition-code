@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.49,
-      "y": 5.52
+      "x": 1.3040821510214458,
+      "y": 5.55300264886244
     },
     "rotation": 0
   },
@@ -12,45 +12,39 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Start Shooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Start Feeder"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Deploy Intake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake Intake"
+            "pathName": "BC Note 2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BC Note 2"
+            "pathName": "BC Speaker"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BC Note 1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BC Speaker"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BC Note 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BC Speaker"
           }
         }
       ]
