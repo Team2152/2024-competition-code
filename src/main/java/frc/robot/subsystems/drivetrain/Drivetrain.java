@@ -220,7 +220,7 @@ public class Drivetrain extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         },
-        new Pose2d());
+        pose);
   }
 
   /**

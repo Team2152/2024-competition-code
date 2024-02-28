@@ -2,15 +2,18 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.LEDs;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.ShooterConstants;
 
 public class RobotContainer {
   // public final Limelight m_frontCamera;
@@ -135,6 +138,14 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
+    // return m_autoChooser.getSelected();
+    return new RunCommand(() -> {
+      m_shooter.setShooterPower(1);
+      Timer.delay(2);
+      m_shooter.setFeederPower(1);
+      Timer.delay(5);
+      m_shooter.setFeederPower(0);
+      m_shooter.setShooterPower(0);
+    });
   }
 }
