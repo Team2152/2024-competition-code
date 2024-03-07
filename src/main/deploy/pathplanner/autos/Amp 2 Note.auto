@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 6.64
+      "x": 1.3183699606835837,
+      "y": 5.549946874541637
     },
-    "rotation": 60.0
+    "rotation": 0.9093804491991082
   },
   "command": {
     "type": "sequential",
@@ -14,13 +14,25 @@
         {
           "type": "named",
           "data": {
-            "name": "Deploy Intake"
+            "name": "AimShooter"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Start Shooter"
+            "name": "StartShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartFeeder"
           }
         },
         {
@@ -32,91 +44,79 @@
         {
           "type": "named",
           "data": {
-            "name": "Start Feeder"
+            "name": "StopFeeder"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartIntake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BL Note 1"
+            "pathName": "BC Note 2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "RetractIntake"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
+            "name": "StopIntake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BL Speaker "
+            "pathName": "BC Speaker"
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "BL Note 2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Speaker "
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Note 3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Speaker "
+            "waitTime": 3.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "StartFeeder"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "StartOuttake"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": null
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
+            "waitTime": 0.0
           }
         }
       ]

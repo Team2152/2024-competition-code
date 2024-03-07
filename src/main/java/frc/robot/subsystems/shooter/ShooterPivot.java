@@ -64,7 +64,7 @@ public class ShooterPivot extends SubsystemBase{
     }
 
     public Command setShooterAngle(double targetAngle) {
-        return run(() -> {
+        return runOnce(() -> {
             // double intakePivotOutput = m_pivotPIDController.calculate(getShooterAngle().getValueAsDouble(), targetAngle);
             // m_pivotMotor.set(intakePivotOutput);
             double intakeTargetPosition = Units.degreesToRotations(targetAngle);

@@ -102,7 +102,7 @@ public class Drivetrain extends SubsystemBase {
     
     m_poseEstimator = new SwerveDrivePoseEstimator(
       DriveConstants.kDriveKinematics,
-      m_gyro.getRotation2d(),
+      getHeading(),
       getModulePositions(),
       new Pose2d()
     );
@@ -141,7 +141,7 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_poseEstimator.update(m_gyro.getRotation2d(), getModulePositions());
+    m_poseEstimator.update(getHeading(), getModulePositions());
 
     // Optional<EstimatedRobotPose> estRobotPose = m_frontCamera.getEstimatedPose();
     // if (estRobotPose.isPresent()) {
@@ -213,7 +213,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void resetPose(Pose2d pose) {
     m_poseEstimator.resetPosition(
-        m_gyro.getRotation2d(),
+        getHeading(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -298,7 +298,7 @@ public class Drivetrain extends SubsystemBase {
 
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, m_gyro.getRotation2d())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, getHeading())
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -368,8 +368,8 @@ public class Drivetrain extends SubsystemBase {
    *
    * @return the robot's heading in degrees, from -180 to 180
    */
-  public double getHeading() {
-    return m_gyro.getRotation2d().getDegrees();
+  public Rotation2d getHeading() {
+    return m_gyro.getRotation2d();
   }
 
   /**

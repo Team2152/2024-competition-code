@@ -26,9 +26,16 @@ public class FeederWheels extends SubsystemBase{
         return m_leftFeederMotor.get();
     }
 
-    public Command setFeederPower(double power) {
-        return run(() -> {
+    public Command setFeederPowerConstant(double power) {
+        return runOnce(() -> {
             m_leftFeederMotor.set(power);
         });
     }
+
+    public Command setFeederPower(double power) {
+        return runEnd(
+          () -> m_leftFeederMotor.set(power),
+          () -> m_leftFeederMotor.set(0)
+        ); 
+      }
 }

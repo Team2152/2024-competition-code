@@ -28,10 +28,17 @@ public class Shooter extends SubsystemBase {
         return m_feederWheels.setFeederPower(power);
     }
 
+    public Command setFeederPowerConstant(double power) {
+        return m_feederWheels.setFeederPowerConstant(power);
+    }
+
+    public Command setShooterPowerConstant(double power) {
+        return m_shooterWheels.setShooterPowerConstant(power);
+    }
+
     public Command setShooterPower(double power) {
         return m_shooterWheels.setShooterPower(power);
     }
-
 
     public double getShooterAngleDouble() {
         return m_shooterPivot.getShooterAngle().getValueAsDouble();

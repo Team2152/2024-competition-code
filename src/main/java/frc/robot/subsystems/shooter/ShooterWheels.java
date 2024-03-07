@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,9 +24,16 @@ public class ShooterWheels extends SubsystemBase{
     return m_leftShooterMotor.get();
   }
 
-  public Command setShooterPower(double power) {
-    return run(() -> {
+  public Command setShooterPowerConstant(double power) {
+    return runOnce(() -> {
       m_leftShooterMotor.set(power);
     });
+  }
+
+  public Command setShooterPower(double power) {
+    return runEnd(
+      () -> m_leftShooterMotor.set(power),
+      () -> m_leftShooterMotor.set(0)
+    ); 
   }
 }

@@ -1,17 +1,17 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.LEDs;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.ShooterConstants;
 
@@ -42,7 +42,23 @@ public class RobotContainer {
 
     m_leds = new LEDs(OIConstants.kLedPort, OIConstants.kLedLength);
 
-    m_autoChooser = AutoBuilder.buildAutoChooser();
+    NamedCommands.registerCommand("DeployIntake", m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut));
+    NamedCommands.registerCommand("RetractIntake", m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn));
+
+    NamedCommands.registerCommand("StartIntake", m_intake.setIntakeAngle(IntakeConstants.kIntakeIntake));
+    NamedCommands.registerCommand("StopIntake", m_intake.setIntakeAngle(0));
+    NamedCommands.registerCommand("StartOuttake", m_intake.setIntakeAngle(IntakeConstants.kIntakeOuttake));
+
+    NamedCommands.registerCommand("StartFeeder", m_shooter.setFeederPowerConstant(ShooterConstants.kFeederOn));
+    NamedCommands.registerCommand("StartShooter", m_shooter.setShooterPowerConstant(ShooterConstants.kShooterOn));
+
+    NamedCommands.registerCommand("StopFeeder", m_shooter.setFeederPowerConstant(0));
+    NamedCommands.registerCommand("StopShooter", m_shooter.setShooterPowerConstant(0));
+
+    NamedCommands.registerCommand("AimShooter", m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointSpeakerDefault));
+    NamedCommands.registerCommand("StowShooter", m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow));
+
+    m_autoChooser = AutoBuilder.buildAutoChooser("Preload Note Shooter");
     SmartDashboard.putData(m_autoChooser);
 
     m_driverController = new CommandXboxController(Constants.OIConstants.kDriverControllerPort);
@@ -62,90 +78,40 @@ public class RobotContainer {
         () -> m_driverController.rightBumper().getAsBoolean()
     ));
 
-    // new Trigger(m_intakeLimitSwitch::get)
-    //   .onTrue(m_intake.setIntakeAngle(0), m_leds.setColor()
-    // );
-
     m_driverController.leftBumper()
-      .whileTrue(
-          m_drivetrain.setX()
-      );
-
-    m_driverController.start()
-      .whileTrue(
-        m_drivetrain.zeroHeading()
-    );
-
-    m_driverController.y()
-      .onTrue(
-        m_intake.setIntakeAngle(-25))
-          .onFalse( 
-            m_intake.setIntakeAngle(120));
-
-    m_driverController.a()
-      .whileTrue(
-        m_intake.setIntakePowerWithChecks(1)
-      );
-
-    m_driverController.b()
-      .whileTrue(
-        m_intake.setIntakePower(-1)
-      );
-
-    m_driverController.x()
-      .onTrue(m_shooter.setFeederPower(-0.5))
-      .onFalse(m_shooter.setFeederPower(0));
+      .onTrue(m_drivetrain.setX());
 
     m_driverController.povUp()
-      .onTrue(m_shooter.setShooterPower(1))
-      .onFalse(m_shooter.setShooterPower(0));
+      .whileTrue(m_drivetrain.zeroHeading());
 
-    m_driverController.povDown()
-      .onTrue(m_shooter.setShooterAngle(67.8));
+    m_operatorController.a()
+      .onTrue(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut))
+      .onFalse(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn));
 
-    m_driverController.povLeft()
-      .onTrue(m_shooter.setShooterAngle(0));
+    m_operatorController.leftBumper()
+      .onTrue(m_intake.setIntakePower(IntakeConstants.kIntakeIntake))
+      .onFalse(m_intake.setIntakePower(0));
 
-  //   m_operatorController.a()
-  //     .onTrue(m_intake.setIntakePower(-1))
-  //     .onFalse(m_intake.setIntakePower(0));
+    m_operatorController.rightBumper()
+    .onTrue(m_intake.setIntakePower(IntakeConstants.kIntakeOuttake))
+    .onFalse(m_intake.setIntakePower(0));
 
-  //   m_operatorController.b()
-  //     .onTrue(m_shooter.setShooterPower(1))
-  //     .onFalse(m_shooter.setShooterPower(0));
+    m_operatorController.povDown()
+      .onTrue(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointSpeakerDefault));
 
-  m_operatorController.rightBumper()
-  .onTrue(m_intake.setIntakePower(1))
-  .onFalse(m_intake.setIntakePower(0));
-  
-  m_operatorController.leftBumper()
-  .onTrue(m_intake.setIntakePower(-1))
-  .onFalse(m_intake.setIntakePower(0));
-  
-  m_operatorController.a()
-    .onTrue(
-      m_intake.setIntakeAngle(-25))
-        .onFalse( 
-          m_intake.setIntakeAngle(120));
+    m_operatorController.povUp()
+      .onTrue(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow));
 
-  m_operatorController.y()
-    .onTrue(m_shooter.setFeederPower(-0.5))
-    .onFalse(m_shooter.setFeederPower(0))
-    .onTrue(m_shooter.setShooterPower(1))
+    m_operatorController.leftTrigger()
+      .onTrue(m_shooter.setFeederPower(ShooterConstants.kFeederOn / 2))
+      .onFalse(m_shooter.setFeederPower(0));
+
+    m_operatorController.rightTrigger()
+    .onTrue(m_shooter.setShooterPower(ShooterConstants.kShooterOn))
     .onFalse(m_shooter.setShooterPower(0));
-
-
   }
 
   public Command getAutonomousCommand() {
-    // return m_autoChooser.getSelected();
-    return new RunCommand(() -> {
-      m_shooter.setShooterPower(1);
-      Timer.delay(2);
-      m_shooter.setFeederPower(1);
-      Timer.delay(5);
-      m_shooter.setFeederPower(0);
-      m_shooter.setShooterPower(0);
-    });
+    return m_autoChooser.getSelected();
   }
 }

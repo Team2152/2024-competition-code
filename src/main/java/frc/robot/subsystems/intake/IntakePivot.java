@@ -22,7 +22,7 @@ public class IntakePivot extends SubsystemBase{
 
         m_pivotMotorConfigs = new TalonFXConfiguration();
         Slot0Configs slot0Configs = m_pivotMotorConfigs.Slot0;
-        slot0Configs.kS = 0.15; // Add 0.25 V output to overcome static friction
+        slot0Configs.kS = 0.16; // Add 0.25 V output to overcome static friction
         slot0Configs.kG = 0.68; // Gravity :3
         slot0Configs.kV = 0.8; // A velocity target of 1 rps results in 12.0 V output
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
@@ -44,7 +44,7 @@ public class IntakePivot extends SubsystemBase{
          */
 
         m_pivotMotor.getConfigurator().apply(m_pivotMotorConfigs);
-        m_request = new MotionMagicVoltage(0); // default pivot position
+        m_request = new MotionMagicVoltage(0);
     } 
 
     @Override
@@ -55,9 +55,7 @@ public class IntakePivot extends SubsystemBase{
     }
 
     public Command setIntakeAngle(double targetAngle) {
-        return run(() -> {
-            // double intakePivotOutput = m_pivotPIDController.calculate(getIntakeAngle().getValueAsDouble(), targetAngle);
-            // m_pivotMotor.set(intakePivotOutput);
+        return runOnce(() -> {
             double intakeTargetPosition = Units.degreesToRotations(targetAngle);
             m_pivotMotor.setControl(m_request.withPosition(intakeTargetPosition));
         }); 

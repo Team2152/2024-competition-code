@@ -13,6 +13,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -32,22 +33,28 @@ public final class Constants {
 
     public static final int kIntakeNoteLsPort = 1;
 
-    public static final double kIntakeSetpointOut = 0;
-    public static final double kIntakeSetpointIn = 90;
+    public static final double kIntakeSetpointOut = 150;
+    public static final double kIntakeSetpointIn = -30;
+
+    public static final double kIntakeIntake = -1;
+    public static final double kIntakeOuttake = 1;
   }
 
   public static final class ShooterConstants {
     public static final int kPivotCanId = 15;
-    public static final int kLeftShooterCanId = 13;
-    public static final int kRightShooterCanId = 14;
+    public static final int kLeftShooterCanId = 14;
+    public static final int kRightShooterCanId = 13;
     public static final int kLeftFeederCanId = 15;
     public static final int kRightFeederCanId = 16;
 
-    public static final double kShooterSetpointStow = -90;
-    public static final double kShooterSetpointSpeakerDefault = 55;
+    public static final double kShooterSetpointStow = 0;
+    public static final double kShooterSetpointSpeakerDefault = 67.8;
 
     public static final double kShooterHeight = 0.4318;
     public static final boolean kFeederInverted = true;
+
+    public static final double kShooterOn = 1;
+    public static final double kFeederOn = 1;
   }
 
   public static class Vision {
@@ -166,7 +173,9 @@ public final class Constants {
     public static final double kDriveDeadband = 0.15;
 
     public static final int kLedPort = 0;
-    public static final int kLedLength = 69;
+    public static final int kLedLength = 106;
+
+    public static final Color kLedOrange = new Color(255, 50, 0);
   }
 
   public static final class AutoConstants {

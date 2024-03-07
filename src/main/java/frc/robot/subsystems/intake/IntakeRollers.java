@@ -29,7 +29,7 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   public Command setIntakePowerConstant(double power) {
-    return run(
+    return runOnce(
       () -> m_intakeMotor.set(power)
     ); 
   }
