@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -47,8 +48,8 @@ public class Limelight extends SubsystemBase {
         return result.hasTargets();
     }
 
-    public void setLED(VisionLEDMode ledMode) {
-        m_camera.setLED(ledMode);
+    public Command setLED(VisionLEDMode ledMode) {
+        return run(() -> m_camera.setLED(ledMode));
     }
 
     public Optional<EstimatedRobotPose> getEstimatedPose() {

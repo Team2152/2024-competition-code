@@ -48,7 +48,7 @@ public final class Constants {
     public static final int kRightFeederCanId = 16;
 
     public static final double kShooterSetpointStow = 0;
-    public static final double kShooterSetpointSpeakerDefault = 67.8;
+    public static final double kShooterSetpointSpeakerDefault = -32;
 
     public static final double kShooterHeight = 0.4318;
     public static final boolean kFeederInverted = true;
@@ -58,10 +58,10 @@ public final class Constants {
   }
 
   public static class Vision {
-    public static final String kFrontCameraName = "frontCamera";
+    public static final String kRearCameraName = "frontCamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center. = new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0)
-    public static final Transform3d kRobotToCam =
-      new Transform3d(new Translation3d(0.3556, 0.0, 0.0), new Rotation3d(0, 0.523599, 0));
+    public static final Transform3d kRearRobotToCam =
+      new Transform3d(new Translation3d(-0.267, 0.0, 0.457), new Rotation3d(0, 0.175, 3.142));
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout =
@@ -76,7 +76,7 @@ public final class Constants {
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 4.8;
+    public static final double kMaxSpeedMetersPerSecond = 4.2;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     public static final double kDirectionSlewRate = 1.2; // radians per second
@@ -86,9 +86,9 @@ public final class Constants {
     public static final double kLimiterModifier = 5.0; // speed / modifier
 
     // Chassis configuration
-    public static final double kTrackWidth = Units.inchesToMeters(12.5);
+    public static final double kTrackWidth = Units.inchesToMeters(18);
     // Distance between centers of right and left wheels on robot
-    public static final double kWheelBase = Units.inchesToMeters(17);
+    public static final double kWheelBase = Units.inchesToMeters(25);
     // Distance between front and back wheels on robot
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
         new Translation2d(kWheelBase / 2, kTrackWidth / 2),
@@ -179,8 +179,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kMaxSpeedMetersPerSecond = 4.2;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 6.94;
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
 

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 6.64
+      "x": 0.6824385479756879,
+      "y": 4.451519888955271
     },
-    "rotation": 60.0
+    "rotation": -60.06848815949223
   },
   "command": {
     "type": "sequential",
@@ -24,99 +24,105 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StartFeeder"
+            "name": "Shoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BL Note 1"
+            "pathName": "Long Note 5"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StopFeeder"
+            "name": "StowShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "DeployIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartIntake"
+            "name": "StopIntake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BL Speaker "
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Note 2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Speaker "
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Travel Wide"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL Speaker "
+            "pathName": "Long Speaker"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "RetractIntake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "AimShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "Handoff"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "StopShooter"
           }
         }
       ]

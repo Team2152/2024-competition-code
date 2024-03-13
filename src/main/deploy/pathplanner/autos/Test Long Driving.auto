@@ -2,25 +2,19 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.6924444618120014,
+      "x": 0.6777587794889373,
       "y": 4.449761743888425
     },
-    "rotation": 121.26373169437743
+    "rotation": -62.65012421993005
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "AimShooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartShooter"
+            "pathName": "Long Note 5"
           }
         },
         {
@@ -30,33 +24,33 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "StartFeeder"
+            "pathName": "Long Speaker"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopFeeder"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooter"
+            "waitTime": 1.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Travel Wide"
+            "pathName": "Long Note 4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Long Speaker"
           }
         }
       ]

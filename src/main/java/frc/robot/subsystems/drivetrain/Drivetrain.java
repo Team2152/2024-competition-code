@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,10 +11,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.Limelight;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,8 +33,11 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import org.photonvision.EstimatedRobotPose;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -74,18 +83,18 @@ public class Drivetrain extends SubsystemBase {
 
   private final Field2d m_field = new Field2d();
   
-  //private final Limelight m_frontCamera;
+  private final Limelight m_rearCamera;
 
-  public Drivetrain() {
-    //m_frontCamera = null;
+  public Drivetrain(Limelight camera) {
+    m_rearCamera = camera;
     AutoBuilder.configureHolonomic(
       this::getPose,
       this::resetPose,
       this::getChassisSpeeds,
       this::setChassisSpeeds,
       new HolonomicPathFollowerConfig(
-        new PIDConstants(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD),
-        new PIDConstants(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD),
+        new PIDConstants(5, 0, 0),
+        new PIDConstants(5, 0, 0),
         DriveConstants.kMaxSpeedMetersPerSecond,
         (DriveConstants.kWheelBase / 39.37 ) / 2,
         new ReplanningConfig()
@@ -108,6 +117,27 @@ public class Drivetrain extends SubsystemBase {
     );
 
     SmartDashboard.putData("Field", m_field);
+
+    SmartDashboard.putData("Swerve Drive", new Sendable() {
+      @Override
+      public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("SwerveDrive");
+
+        builder.addDoubleProperty("Front Left Angle", () -> m_frontLeft.getState().angle.getRadians(), null);
+        builder.addDoubleProperty("Front Left Velocity", () -> m_frontLeft.getState().speedMetersPerSecond, null);
+
+        builder.addDoubleProperty("Front Right Angle", () -> m_frontRight.getState().angle.getRadians(), null);
+        builder.addDoubleProperty("Front Right Velocity", () -> m_frontRight.getState().speedMetersPerSecond, null);
+
+        builder.addDoubleProperty("Back Left Angle", () -> m_rearLeft.getState().angle.getRadians(), null);
+        builder.addDoubleProperty("Back Left Velocity", () -> m_rearLeft.getState().speedMetersPerSecond, null);
+
+        builder.addDoubleProperty("Back Right Angle", () -> m_rearRight.getState().angle.getRadians(), null);
+        builder.addDoubleProperty("Back Right Velocity", () -> m_rearRight.getState().speedMetersPerSecond, null);
+
+        builder.addDoubleProperty("Robot Angle", () -> m_gyro.getRotation2d().getRadians(), null);
+      }
+    });
   }
 
   public Command followPath(PathPlannerPath path) {
@@ -143,20 +173,21 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     m_poseEstimator.update(getHeading(), getModulePositions());
 
-    // Optional<EstimatedRobotPose> estRobotPose = m_frontCamera.getEstimatedPose();
-    // if (estRobotPose.isPresent()) {
-    //   EstimatedRobotPose estRobotPoseData = estRobotPose.get();
-    //   Matrix<N3, N1> estStdDevs = m_frontCamera.getEstimationStdDevs(estRobotPose.get().estimatedPose.toPose2d());
-    //   Pose2d pose = estRobotPoseData.estimatedPose.toPose2d();
-    //   double timestamp = estRobotPoseData.timestampSeconds;
+    Optional<EstimatedRobotPose> estRobotPose = m_rearCamera.getEstimatedPose();
+    if (estRobotPose.isPresent()) {
+      EstimatedRobotPose estRobotPoseData = estRobotPose.get();
+      Matrix<N3, N1> estStdDevs = m_rearCamera.getEstimationStdDevs(estRobotPose.get().estimatedPose.toPose2d());
+      Pose2d pose = estRobotPoseData.estimatedPose.toPose2d();
+      double timestamp = estRobotPoseData.timestampSeconds;
 
-    //   if (pose != lastPose) {
-    //     m_poseEstimator.addVisionMeasurement(
-    //       pose,
-    //       timestamp,
-    //       estStdDevs
-    //     );
-    //   }
+      if (pose != lastPose) {
+        m_poseEstimator.addVisionMeasurement(
+          pose,
+          timestamp,
+          estStdDevs
+        );
+      }
+    }
   
 
     m_field.setRobotPose(getPose());

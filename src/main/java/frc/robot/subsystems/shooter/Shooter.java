@@ -12,7 +12,7 @@ public class Shooter extends SubsystemBase {
     private final ShooterWheels m_shooterWheels;
 
     public Shooter() {
-        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId, 100);
+        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId, 250);
         m_feederWheels = new FeederWheels(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
         m_shooterWheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
     }
