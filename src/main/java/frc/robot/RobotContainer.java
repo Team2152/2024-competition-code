@@ -106,31 +106,62 @@ public class RobotContainer {
 
     m_driverController.rightTrigger()
       .whileTrue(m_drivetrain.setX())
-      .onTrue(m_leds.setColor(Color.kFirstRed))
-      .onFalse(m_leds.setColor(OIConstants.kLedOrange));
+      .onTrue(
+        m_leds.setColor(Color.kFirstRed)
+        .andThen(m_leds.setBlink(true)))
+      .onFalse(
+        m_leds.setColor(OIConstants.kLedOrange)
+        .andThen(m_leds.setBlink(false)));
 
     m_driverController.povUp()
       .whileTrue(m_drivetrain.zeroHeading());
 
+    m_driverController.a()
+      .onTrue(
+        m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointHang)
+        .andThen(m_leds.setColor(Color.kGreen))
+        .andThen(m_leds.setBlink(true))
+      ).onFalse(
+        m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow)
+        .andThen(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointHang))
+        .andThen(m_leds.setBlink(false))
+        .andThen(new WaitCommand(3))
+        .andThen(m_leds.setColor(OIConstants.kLedOrange))
+        .andThen(m_leds.setBlink(false)));
+
     m_operatorController.a()
       .onTrue(
         m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut)
+        .andThen(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow))
         .andThen(m_leds.setColor(Color.kRed))
       )
       .onFalse(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn)
-      .andThen(m_leds.setColor(Color.kBlue)));
+      .andThen(m_leds.setColor(Color.kBlue))
+      .andThen(new WaitCommand(3))
+      .andThen(m_leds.setColor(OIConstants.kLedOrange)));
 
-    m_operatorController.x()
-      .onTrue(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut / 3)
-      .andThen(m_leds.setColor(Color.kWhite))
-      .andThen(new WaitCommand(2.3))
-      .andThen(m_intake.setIntakePowerConstant(1))
-      .andThen(new WaitCommand(1))
-      .andThen(m_intake.setIntakePower(0))  
-      .andThen(new WaitCommand(0.1))
-      .andThen(m_intake.setIntakeAngle(0))   
+    m_operatorController.x().onTrue(
+      m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointAmp)
+      .andThen(m_leds.setColor(Color.kRed))
+      .andThen(m_leds.setBlink(true))
+    ).onFalse(
+      m_intake.setIntakePowerConstant(IntakeConstants.kIntakeOuttake)
+      .andThen(m_leds.setBlink(false))
+      .andThen(new WaitCommand(0.3))
+      .andThen(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn))
+      .andThen(m_intake.setIntakePowerConstant(0))
       .andThen(m_leds.setColor(OIConstants.kLedOrange))
     );
+
+      // .onTrue(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut / 3)
+      // .andThen(m_leds.setColor(Color.kYellow))
+      // .andThen(new WaitCommand(2.3))
+      // .andThen(m_intake.setIntakePowerConstant(1))
+      // .andThen(new WaitCommand(1))
+      // .andThen(m_intake.setIntakePowerConstant(0))  
+      // .andThen(new WaitCommand(0.1))
+      // .andThen(m_intake.setIntakeAngle(0))   
+      // .andThen(m_leds.setColor(OIConstants.kLedOrange))
 
     m_operatorController.rightBumper()
       .onTrue(
@@ -147,33 +178,18 @@ public class RobotContainer {
     m_operatorController.leftBumper()
       .whileTrue(m_intake.setIntakePower(-1));
 
-    // m_driverController.leftBumper()
-    //  .onTrue(m_shooter.setShooterAngle(-80));
-
-    // m_driverController.b()
-    //   .onTrue(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn)
-    //   .andThen(new WaitCommand(0.5))
-    //   .andThen(m_intake.setIntakePowerConstant(0.5))
-    //   .andThen(m_shooter.setFeederPowerConstant(0.5))
-    //   .andThen(new WaitCommand(0.25))
-    //   .andThen(m_intake.setIntakePowerConstant(0))
-    //   .andThen(m_shooter.setFeederPowerConstant(0))
-    // );
-
-    // m_driverController.leftBumper()
-    //   .onTrue(m_intake.setIntakePower(IntakeConstants.kIntakeIntake))
-    //   .onFalse(m_intake.setIntakePower(0));
-
     m_operatorController.b()
-    .onTrue(m_intake.setIntakePower(IntakeConstants.kIntakeOuttake));
+    .whileTrue(m_intake.setIntakePower(IntakeConstants.kIntakeOuttake));
+
+    m_operatorController.povLeft().onTrue(
+      m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointSpeakerDefault)
+      .andThen(m_leds.setBlink(false)));
+  
+    m_operatorController.povUp().onTrue(
+      m_shooter.setShooterAngle(-90)
+      .andThen(m_leds.setColor(OIConstants.kLedOrange)));
 
     m_operatorController.povDown()
-      .onTrue(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointSpeakerDefault));
-  
-    m_operatorController.povUp()
-      .onTrue(m_shooter.setShooterAngle(-90));
-
-    m_operatorController.povLeft()
       .onTrue(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow));
 
     m_operatorController.leftTrigger()

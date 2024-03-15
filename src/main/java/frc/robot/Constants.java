@@ -29,12 +29,15 @@ public final class Constants {
     public static final boolean kIntakeInverted = false;
     
     // Amp Limit
-    public static final int kIntakeAmps = 30;
+    public static final int kIntakeAmps = 50;
 
     public static final int kIntakeNoteLsPort = 1;
 
-    public static final double kIntakeSetpointOut = 150;
-    public static final double kIntakeSetpointIn = -30;
+    public static final double kIntakeSetpointHang = 45;
+    public static final double kIntakeSetpointOut = 174;
+    public static final double kIntakeSetpointIn = -10;
+
+    public static final double kIntakeSetpointAmp = 65;
 
     public static final double kIntakeIntake = -1;
     public static final double kIntakeOuttake = 1;
@@ -49,6 +52,10 @@ public final class Constants {
 
     public static final double kShooterSetpointStow = 0;
     public static final double kShooterSetpointSpeakerDefault = -32;
+    public static final double kShooterSetpointHang = -102;
+
+    public static final double kNegativeShooterLimit = -102;
+    public static final double kPositiveShooterLimit = 5;
 
     public static final double kShooterHeight = 0.4318;
     public static final boolean kFeederInverted = true;
@@ -120,7 +127,7 @@ public final class Constants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T, 13T, or 14T.
     // This changes the drive speed of the module (a pinion gear with more teeth will result in a
     // robot that drives faster).
-    public static final int kDrivingMotorPinionTeeth = 14;
+    public static final int kDrivingMotorPinionTeeth = 13;
 
     // Invert the turning encoder, since the output shaft rotates in the opposite direction of
     // the steering motor in the MAXSwerve Module.
@@ -163,8 +170,8 @@ public final class Constants {
     public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
 
-    public static final int kDrivingMotorCurrentLimit = 40; // amps
-    public static final int kTurningMotorCurrentLimit = 30; // amps
+    public static final int kDrivingMotorCurrentLimit = 80; // amps
+    public static final int kTurningMotorCurrentLimit = 60; // amps
   }
 
   public static final class OIConstants {
@@ -173,7 +180,7 @@ public final class Constants {
     public static final double kDriveDeadband = 0.15;
 
     public static final int kLedPort = 0;
-    public static final int kLedLength = 106;
+    public static final int kLedLength = 107;
 
     public static final Color kLedOrange = new Color(255, 50, 0);
   }

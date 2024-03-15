@@ -276,6 +276,7 @@ public class Drivetrain extends SubsystemBase {
     if (limiterEnabled) {
       xSpeed = xSpeed / DriveConstants.kLimiterModifier;
       ySpeed = ySpeed / DriveConstants.kLimiterModifier;
+      rot = rot / DriveConstants.kLimiterModifier;
     }
 
     if (rateLimit) {
