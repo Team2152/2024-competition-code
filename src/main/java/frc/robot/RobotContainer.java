@@ -129,6 +129,14 @@ public class RobotContainer {
         .andThen(m_leds.setColor(OIConstants.kLedOrange))
         .andThen(m_leds.setBlink(false)));
 
+    m_driverController.povDown()
+      .onTrue(
+        m_shooter.setShooterAngle(m_shooter.getShooterAngleDouble() - 1));
+
+    m_driverController.povUp()
+      .onTrue(
+        m_shooter.setShooterAngle(m_shooter.getShooterAngleDouble() + 1));
+
     m_operatorController.a()
       .onTrue(
         m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut)

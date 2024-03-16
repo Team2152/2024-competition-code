@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.AutoAimConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Limelight;
 
@@ -30,6 +31,8 @@ public class ShooterPivot extends SubsystemBase{
 
     public ShooterPivot(int pivotMotorCanId, double gearRatio) {
         m_pivotMotor = new TalonFX(pivotMotorCanId);
+
+        m_pivotMotor.setInverted(true);
 
         m_pivotMotorConfigs = new TalonFXConfiguration();
         Slot0Configs slot0Configs = m_pivotMotorConfigs.Slot0;
@@ -107,7 +110,16 @@ public class ShooterPivot extends SubsystemBase{
                     Math.pow(ShooterConstants.kShooterHeight - requestedTagPose.getZ(), 2)
                 );
 
-                return Optional.of(1.0);
+                if (distanceToTarget < AutoAimConstants.kClosestDistance) {
+                    distanceToTarget = AutoAimConstants.kClosestDistance;
+                } else if (distanceToTarget > AutoAimConstants.kFarthestDistance) {
+                    distanceToTarget = AutoAimConstants.kFarthestDistance;
+                }
+
+                double factor = (distanceToTarget - AutoAimConstants.kClosestDistance) / (AutoAimConstants.kFarthestDistance - AutoAimConstants.kClosestDistance);
+                double angleRequired = AutoAimConstants.kClosestAngle + factor * (AutoAimConstants.kFarthestAngle - AutoAimConstants.kClosestAngle);
+
+                return Optional.of(angleRequired);
             }
         }
         return Optional.empty();
