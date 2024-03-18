@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -107,13 +108,13 @@ public class RobotContainer {
     m_driverController.rightTrigger()
       .whileTrue(m_drivetrain.setX())
       .onTrue(
-        m_leds.setColor(Color.kFirstRed)
+        m_leds.setColor(Color.kRed)
         .andThen(m_leds.setBlink(true)))
       .onFalse(
         m_leds.setColor(OIConstants.kLedOrange)
         .andThen(m_leds.setBlink(false)));
 
-    m_driverController.povUp()
+    m_driverController.leftBumper()
       .whileTrue(m_drivetrain.zeroHeading());
 
     m_driverController.a()
@@ -129,13 +130,26 @@ public class RobotContainer {
         .andThen(m_leds.setColor(OIConstants.kLedOrange))
         .andThen(m_leds.setBlink(false)));
 
-    m_driverController.povDown()
-      .onTrue(
-        m_shooter.setShooterAngle(m_shooter.getShooterAngleDouble() - 1));
-
     m_driverController.povUp()
+      .whileTrue(
+        m_shooter.setPivotPower(-0.05))
+      .onFalse(
+        m_shooter.setPivotPower(0));
+
+    m_driverController.povDown()
+      .whileTrue(
+        m_shooter.setPivotPower(0.05))
+      .onFalse(
+        m_shooter.setPivotPower(0));
+
+      m_driverController.x()
+        .whileTrue(new RunCommand(() -> {
+          m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(4, 0.4318, m_shooter));
+      }))
       .onTrue(
-        m_shooter.setShooterAngle(m_shooter.getShooterAngleDouble() + 1));
+        m_rearCamera.setLED(VisionLEDMode.kBlink)
+        .andThen(new WaitCommand(2))
+        .andThen(m_rearCamera.setLED(VisionLEDMode.kOff)));
 
     m_operatorController.a()
       .onTrue(

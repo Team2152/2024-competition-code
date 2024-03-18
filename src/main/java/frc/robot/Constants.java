@@ -22,11 +22,11 @@ import com.revrobotics.CANSparkBase.IdleMode;
 public final class Constants {
   public static final class AutoAimConstants {
     // Must be in meters
-    public static final double kClosestDistance = 0;    // Closest distance we can shoot into the speaker.
-    public static final double kFarthestDistance = 10;  // Farthest distance we can shoot into the speaker.
+    public static final double kClosestDistance = 2; // 9144    // Closest distance we can shoot into the speaker.
+    public static final double kFarthestDistance = 3.2258;  // Farthest distance we can shoot into the speaker.
 
     public static final double kClosestAngle = 32;      // Angle used for the closest distance.
-    public static final double kFarthestAngle = 60;     // Angle used for the farthest distance.
+    public static final double kFarthestAngle = 47.34;     // Angle used for the farthest distance.
   }
 
   public static final class IntakeConstants {
@@ -59,12 +59,12 @@ public final class Constants {
     public static final int kLeftFeederCanId = 15;
     public static final int kRightFeederCanId = 16;
 
-    public static final double kShooterSetpointStow = 0;
-    public static final double kShooterSetpointSpeakerDefault = 32;
-    public static final double kShooterSetpointHang = 102;
+    public static final double kShooterSetpointStow = 5;
+    public static final double kShooterSetpointSpeakerDefault = -32;
+    public static final double kShooterSetpointHang = -102;
 
-    public static final double kNegativeShooterLimit = 5;
-    public static final double kPositiveShooterLimit = 102;
+    public static final double kNegativeShooterLimit = -102;
+    public static final double kPositiveShooterLimit = 5;
 
     public static final double kShooterHeight = 0.4318;
     public static final boolean kFeederInverted = true;

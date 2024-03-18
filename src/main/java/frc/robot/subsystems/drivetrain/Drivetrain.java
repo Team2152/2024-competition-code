@@ -5,6 +5,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,10 +17,14 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import frc.robot.Constants;
+import frc.robot.Constants.AutoAimConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -411,5 +416,54 @@ public class Drivetrain extends SubsystemBase {
    */
   public double getTurnRate() {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+  }
+
+  public double getAngleToSpeakerApriltag(int apriltagId, double heightOffset, Shooter m_shooter) {
+      Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
+      Pose2d currentPose = getPose();
+
+          // double headingToTarget = Math.atan2(
+          //     requestedTagPose.getY() - currentPose.getY(),
+          //     requestedTagPose.getX() - currentPose.getX()
+          // );
+
+          // double angleToTarget = Math.atan2(
+          //     requestedTagPose.getZ() - ShooterConstants.kShooterHeight,
+          //     requestedTagPose.getX() - currentPose.getX()
+          // );
+
+      double distanceToTarget = Math.sqrt(
+        Math.pow(currentPose.getX() - requestedTagPose.getX(), 2) +
+        Math.pow(currentPose.getY() - requestedTagPose.getY(), 2) +
+        Math.pow(ShooterConstants.kShooterHeight - requestedTagPose.getZ(), 2)
+      );
+
+      if (distanceToTarget < AutoAimConstants.kClosestDistance) {
+        distanceToTarget = AutoAimConstants.kClosestDistance;
+      } else if (distanceToTarget > AutoAimConstants.kFarthestDistance) {
+        distanceToTarget = AutoAimConstants.kFarthestDistance;
+      }
+
+      double factor = (distanceToTarget - AutoAimConstants.kClosestDistance) / (AutoAimConstants.kFarthestDistance - AutoAimConstants.kClosestDistance);
+      double angleRequired = AutoAimConstants.kClosestAngle + factor * (AutoAimConstants.kFarthestAngle - AutoAimConstants.kClosestAngle);
+
+    
+      System.out.println("Angle Required" + angleRequired);
+      System.out.println("Current Pose: " + currentPose.toString());
+      System.out.println("Target Distance: " + distanceToTarget);
+      System.out.println("\n");
+
+      return angleRequired;
+  }
+
+  public double getHeadingFromApriltag(int apriltagId, Pose2d currentPose) {
+    Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
+
+    double headingToTarget = Math.atan2(
+      requestedTagPose.getY() - currentPose.getY(),
+      requestedTagPose.getX() - currentPose.getX()
+    );
+
+    return headingToTarget;
   }
 }

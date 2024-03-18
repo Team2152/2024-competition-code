@@ -1,7 +1,10 @@
 package frc.robot.subsystems.shooter;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.StatusSignal;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
@@ -20,8 +23,16 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {}
 
+    public Command setPivotPower(double power) {
+        return m_shooterPivot.setPivotPower(power);
+    }
+
     public Command setShooterAngle(double angle) {
         return m_shooterPivot.setShooterAngle(angle);
+    }
+
+    public void setShooterAngleManual(double angle) {
+        m_shooterPivot.setShooterAngleManual(angle);
     }
 
     public Command setFeederPower(double power) {
@@ -54,5 +65,9 @@ public class Shooter extends SubsystemBase {
 
     public double getShooterPower() {
         return m_shooterWheels.getShooterPower();
+    }
+
+    public Command setShooterAngleSupplier(DoubleSupplier angle) {
+        return m_shooterPivot.setShooterAngle(angle.getAsDouble());
     }
 }

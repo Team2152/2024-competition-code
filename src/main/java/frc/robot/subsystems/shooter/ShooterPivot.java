@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import java.util.Optional;
 
+import org.ejml.dense.row.mult.SubmatrixOps_FDRM;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.AutoAimConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Limelight;
@@ -75,53 +77,26 @@ public class ShooterPivot extends SubsystemBase{
 
     public Command setShooterAngle(double angle) {
         return runOnce(() -> {
-            double targetAngle = angle;
-            
-            if (targetAngle > ShooterConstants.kPositiveShooterLimit) {
-                targetAngle = ShooterConstants.kPositiveShooterLimit;
-            } else if (targetAngle < ShooterConstants.kNegativeShooterLimit) {
-                targetAngle = ShooterConstants.kNegativeShooterLimit;
-            }
-            
-            double intakeTargetPosition = Units.degreesToRotations(targetAngle);
-            m_pivotMotor.setControl(m_request.withPosition(intakeTargetPosition));
+            setShooterAngleManual(angle);
         }); 
     }
 
-    public Optional<Double> getNeededShooterAngleFromApriltag(Limelight vision, int apriltagId, Pose2d currentPose, double heightAboveTag) {
-        for (PhotonTrackedTarget i : vision.result.targets) {
-            if (i.getFiducialId() == apriltagId) {
-                PhotonTrackedTarget requestedApriltag = i;
-                Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
-
-                double headingToTarget = Math.atan2(
-                    requestedTagPose.getY() - currentPose.getY(),
-                    requestedTagPose.getX() - currentPose.getX()
-                );
-
-                double angleToTarget = Math.atan2(
-                    requestedTagPose.getZ() - ShooterConstants.kShooterHeight,
-                    requestedTagPose.getX() - currentPose.getX()
-                );
-
-                double distanceToTarget = Math.sqrt(
-                    Math.pow(currentPose.getX() - requestedTagPose.getX(), 2) +
-                    Math.pow(currentPose.getY() - requestedTagPose.getY(), 2) +
-                    Math.pow(ShooterConstants.kShooterHeight - requestedTagPose.getZ(), 2)
-                );
-
-                if (distanceToTarget < AutoAimConstants.kClosestDistance) {
-                    distanceToTarget = AutoAimConstants.kClosestDistance;
-                } else if (distanceToTarget > AutoAimConstants.kFarthestDistance) {
-                    distanceToTarget = AutoAimConstants.kFarthestDistance;
-                }
-
-                double factor = (distanceToTarget - AutoAimConstants.kClosestDistance) / (AutoAimConstants.kFarthestDistance - AutoAimConstants.kClosestDistance);
-                double angleRequired = AutoAimConstants.kClosestAngle + factor * (AutoAimConstants.kFarthestAngle - AutoAimConstants.kClosestAngle);
-
-                return Optional.of(angleRequired);
-            }
+    public void setShooterAngleManual(double angle) {
+        double targetAngle = angle;
+          
+        if (targetAngle > ShooterConstants.kPositiveShooterLimit) {
+            targetAngle = ShooterConstants.kPositiveShooterLimit;
+        } else if (targetAngle < ShooterConstants.kNegativeShooterLimit) {
+            targetAngle = ShooterConstants.kNegativeShooterLimit;
         }
-        return Optional.empty();
+            
+        double intakeTargetPosition = Units.degreesToRotations(targetAngle);
+        m_pivotMotor.setControl(m_request.withPosition(intakeTargetPosition));
     }
+
+    public Command setPivotPower(double power) {
+        return runOnce(() -> m_pivotMotor.set(power));
+    }
+
+
 }

@@ -49,7 +49,7 @@ public class Limelight extends SubsystemBase {
     }
 
     public Command setLED(VisionLEDMode ledMode) {
-        return run(() -> m_camera.setLED(ledMode));
+        return runOnce(() -> m_camera.setLED(ledMode));
     }
 
     public Optional<EstimatedRobotPose> getEstimatedPose() {
