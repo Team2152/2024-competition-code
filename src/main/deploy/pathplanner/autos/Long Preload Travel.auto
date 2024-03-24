@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7511871911042578,
-      "y": 6.681985456994171
+      "x": 0.6924444618120014,
+      "y": 4.46444742621149
     },
-    "rotation": 0
+    "rotation": -59.0362434679265
   },
   "command": {
     "type": "sequential",
@@ -39,6 +39,18 @@
           "type": "named",
           "data": {
             "name": "StopShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 8.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Long Travel"
           }
         }
       ]

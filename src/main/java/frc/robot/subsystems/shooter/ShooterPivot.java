@@ -98,5 +98,7 @@ public class ShooterPivot extends SubsystemBase{
         return runOnce(() -> m_pivotMotor.set(power));
     }
 
-
+    public Command resetPivotMotor(double angle) {
+        return runOnce(() -> m_pivotMotor.setPosition(angle));
+    }
 }

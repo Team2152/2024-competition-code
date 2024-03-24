@@ -2,19 +2,25 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7402504945854966,
-      "y": 4.5526907955224365
+      "x": 1.5148426719035912,
+      "y": 1.2482829974604497
     },
-    "rotation": -60.42216131873867
+    "rotation": -1.0230301886678514
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "StowShooter"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Center Disrupt"
+            "pathName": "Center Disrupt Stage"
           }
         }
       ]

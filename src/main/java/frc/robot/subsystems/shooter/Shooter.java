@@ -15,7 +15,7 @@ public class Shooter extends SubsystemBase {
     private final ShooterWheels m_shooterWheels;
 
     public Shooter() {
-        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId, 250);
+        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId,250);
         m_feederWheels = new FeederWheels(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
         m_shooterWheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
     }
@@ -69,5 +69,9 @@ public class Shooter extends SubsystemBase {
 
     public Command setShooterAngleSupplier(DoubleSupplier angle) {
         return m_shooterPivot.setShooterAngle(angle.getAsDouble());
+    }
+
+    public Command resetPivotMotor(double angle) {
+        return m_shooterPivot.resetPivotMotor(angle);
     }
 }

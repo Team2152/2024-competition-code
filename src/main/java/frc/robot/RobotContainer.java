@@ -5,6 +5,8 @@ import org.photonvision.common.hardware.VisionLEDMode;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -38,6 +40,7 @@ public class RobotContainer {
   public final LEDs m_leds;
 
 
+
   public RobotContainer() {
     m_rearCamera = new Limelight(Constants.Vision.kRearCameraName, Constants.Vision.kRearRobotToCam);
     // m_frontCamera = new Limelight();
@@ -63,6 +66,12 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("AimShooter", m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointSpeakerDefault));
     NamedCommands.registerCommand("StowShooter", m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow));
+    NamedCommands.registerCommand("FlatShooter", m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointFlat));
+
+    NamedCommands.registerCommand("AutoAim", new RunCommand(() -> {
+          int tagId = (DriverStation.getAlliance().get() == Alliance.Blue) ? 7 : 4;
+          m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(tagId, 0.4318, m_shooter));
+      }));
 
     NamedCommands.registerCommand("Handoff", 
       m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn)
@@ -102,8 +111,13 @@ public class RobotContainer {
         () -> m_driverController.getLeftX(),
         () -> m_driverController.getRightX(),
         () -> true,
-        () -> m_driverController.rightBumper().getAsBoolean()
+        () -> m_driverController.leftTrigger().getAsBoolean()
     ));
+
+    m_driverController.start()
+      .whileTrue(
+        m_shooter.resetPivotMotor(0)
+      );
 
     m_driverController.rightTrigger()
       .whileTrue(m_drivetrain.setX())
@@ -117,34 +131,22 @@ public class RobotContainer {
     m_driverController.leftBumper()
       .whileTrue(m_drivetrain.zeroHeading());
 
-    m_driverController.a()
-      .onTrue(
-        m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointHang)
-        .andThen(m_leds.setColor(Color.kGreen))
-        .andThen(m_leds.setBlink(true))
-      ).onFalse(
-        m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow)
-        .andThen(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointHang))
-        .andThen(m_leds.setBlink(false))
-        .andThen(new WaitCommand(3))
-        .andThen(m_leds.setColor(OIConstants.kLedOrange))
-        .andThen(m_leds.setBlink(false)));
-
     m_driverController.povUp()
       .whileTrue(
-        m_shooter.setPivotPower(-0.05))
+        m_shooter.setPivotPower(-0.15))
       .onFalse(
         m_shooter.setPivotPower(0));
 
     m_driverController.povDown()
       .whileTrue(
-        m_shooter.setPivotPower(0.05))
+        m_shooter.setPivotPower(0.15))
       .onFalse(
         m_shooter.setPivotPower(0));
 
       m_driverController.x()
         .whileTrue(new RunCommand(() -> {
-          m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(4, 0.4318, m_shooter));
+          int tagId = (DriverStation.getAlliance().get() == Alliance.Blue) ? 7 : 4;
+          m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(tagId, 0.4318, m_shooter));
       }))
       .onTrue(
         m_rearCamera.setLED(VisionLEDMode.kBlink)
@@ -154,7 +156,6 @@ public class RobotContainer {
     m_operatorController.a()
       .onTrue(
         m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointOut)
-        .andThen(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow))
         .andThen(m_leds.setColor(Color.kRed))
       )
       .onFalse(m_intake.setIntakeAngle(IntakeConstants.kIntakeSetpointIn)
@@ -208,8 +209,7 @@ public class RobotContainer {
       .andThen(m_leds.setBlink(false)));
   
     m_operatorController.povUp().onTrue(
-      m_shooter.setShooterAngle(-90)
-      .andThen(m_leds.setColor(OIConstants.kLedOrange)));
+      m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointFlat));
 
     m_operatorController.povDown()
       .onTrue(m_shooter.setShooterAngle(ShooterConstants.kShooterSetpointStow));

@@ -60,7 +60,8 @@ public final class Constants {
     public static final int kRightFeederCanId = 16;
 
     public static final double kShooterSetpointStow = 5;
-    public static final double kShooterSetpointSpeakerDefault = -32;
+    public static final double kShooterSetpointSpeakerDefault = -28;
+    public static final double kShooterSetpointFlat = -85;
     public static final double kShooterSetpointHang = -102;
 
     public static final double kNegativeShooterLimit = -102;
@@ -77,7 +78,7 @@ public final class Constants {
     public static final String kRearCameraName = "frontCamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center. = new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0)
     public static final Transform3d kRearRobotToCam =
-      new Transform3d(new Translation3d(-0.267, 0.0, 0.457), new Rotation3d(0, 0.175, 3.142));
+      new Transform3d(new Translation3d(-0.267, 0.0, 0.457), new Rotation3d(0, 0.350, 3.142));
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout =

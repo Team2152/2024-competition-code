@@ -421,7 +421,9 @@ public class Drivetrain extends SubsystemBase {
   public double getAngleToSpeakerApriltag(int apriltagId, double heightOffset, Shooter m_shooter) {
       Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
       Pose2d currentPose = getPose();
-
+        // tag 7 = blue speaker
+        // tag 4 = red speaker 
+        // tag 3 = testing red speaker
           // double headingToTarget = Math.atan2(
           //     requestedTagPose.getY() - currentPose.getY(),
           //     requestedTagPose.getX() - currentPose.getX()

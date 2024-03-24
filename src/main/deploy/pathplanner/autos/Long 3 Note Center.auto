@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.31,
-      "y": 5.56
+      "x": 0.7365015087811937,
+      "y": 4.479133108534554
     },
-    "rotation": 0
+    "rotation": -59.036243467926475
   },
   "command": {
     "type": "sequential",
@@ -24,12 +24,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Intake"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 1.0
@@ -42,15 +36,15 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "BC Note 2"
+            "name": "Intake"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "StowShooter"
+            "pathName": "Long Note 5"
           }
         },
         {
@@ -66,39 +60,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "BC Speaker"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RetractIntake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AimShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Handoff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Long Speaker"
           }
         },
         {
@@ -116,7 +86,43 @@
         {
           "type": "named",
           "data": {
-            "name": "StopShooter"
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Long Note 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopIntake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Long Speaker"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0
           }
         }
       ]

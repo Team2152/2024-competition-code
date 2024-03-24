@@ -28,7 +28,11 @@ public class ShooterWheels extends SubsystemBase{
   public Command setShooterPowerConstant(double power) {
     return runOnce(() -> {
       m_leftShooterMotor.set(power);
-      m_rightShooterMotor.set(power - 0.2);
+      if (power <= 0.2) {
+        m_rightShooterMotor.set(0);
+      } else {
+        m_rightShooterMotor.set(power - 0.2);
+      }
     });
   }
 

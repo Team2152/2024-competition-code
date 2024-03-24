@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7257975079330444,
-      "y": 4.50933183556508
+      "x": 0.6630730971658731,
+      "y": 6.579185680732721
     },
-    "rotation": -60.06848815949223
+    "rotation": 59.62087398863171
   },
   "command": {
     "type": "sequential",
@@ -44,7 +44,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Long Note 5"
+            "pathName": "BL Note 1"
           }
         },
         {
@@ -66,15 +66,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Long Speaker"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "RetractIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BL Auto Aim"
           }
         },
         {
@@ -92,7 +92,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.5
           }
         },
         {
@@ -104,7 +104,103 @@
         {
           "type": "wait",
           "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoAim"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
             "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Short Note 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RetractIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BL Auto Aim"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Handoff"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoAim"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
