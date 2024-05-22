@@ -20,6 +20,14 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 
 public final class Constants {
+  public static final class HeadingAlignConstants {
+    public static final double kP = 0.01;
+    public static final double kI = 0;
+    public static final double kD = 0;
+
+    public static final double kTolerance = 5;
+  }
+
   public static final class AutoAimConstants {
     // Must be in meters
     public static final double kClosestDistance = 2; // 9144    // Closest distance we can shoot into the speaker.
@@ -75,7 +83,7 @@ public final class Constants {
   }
 
   public static class Vision {
-    public static final String kRearCameraName = "frontCamera";
+    public static final String kRearCameraName = "rearCamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center. = new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0)
     public static final Transform3d kRearRobotToCam =
       new Transform3d(new Translation3d(-0.267, 0.0, 0.457), new Rotation3d(0, 0.350, 3.142));

@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
@@ -14,14 +16,23 @@ public class Shooter extends SubsystemBase {
     private final FeederWheels m_feederWheels;
     private final ShooterWheels m_shooterWheels;
 
+    private final DigitalInput m_limitSwitch;
+
     public Shooter() {
-        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId,250);
+        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId,62.91);
         m_feederWheels = new FeederWheels(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
         m_shooterWheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
+        m_limitSwitch = new DigitalInput(9);
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        if (!m_limitSwitch.get()) {
+            m_shooterPivot.resetPivotMotorManual(0);
+
+        } 
+        SmartDashboard.putBoolean("Shooter Limitswitch", !m_limitSwitch.get());
+    }
 
     public Command setPivotPower(double power) {
         return m_shooterPivot.setPivotPower(power);

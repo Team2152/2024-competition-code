@@ -38,19 +38,19 @@ public class ShooterPivot extends SubsystemBase{
 
         m_pivotMotorConfigs = new TalonFXConfiguration();
         Slot0Configs slot0Configs = m_pivotMotorConfigs.Slot0;
-        slot0Configs.kS = 0.18;// Add 0.25 V output to overcome static friction
-        slot0Configs.kV = 12.0; // A velocity target of 1 rps results in 12.0 V output
+        slot0Configs.kS = 0.25;// Add 0.25 V output to overcome static friction
+        slot0Configs.kV = 2.0; // A velocity target of 1 rps results in 12.0 V output
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0Configs.kP = 100.0; // A position error of 2.5 rotations results in 12 V output
+        slot0Configs.kP = 25.0; // A position error of 2.5 rotations results in 12 V output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.2; // A velocity error of 1 rps results in 0.1 V output
         m_pivotMotorConfigs.Feedback.SensorToMechanismRatio = gearRatio;
         m_pivotMotorConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         MotionMagicConfigs motionMagicConfigs = m_pivotMotorConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 120 / gearRatio; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 300 / gearRatio; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1000 / gearRatio; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 300 / gearRatio; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 120 / gearRatio; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 300 / gearRatio; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
         /* How to tune pivot configs
          * 
@@ -100,5 +100,9 @@ public class ShooterPivot extends SubsystemBase{
 
     public Command resetPivotMotor(double angle) {
         return runOnce(() -> m_pivotMotor.setPosition(angle));
+    }
+
+    public void resetPivotMotorManual(double angle) {
+        m_pivotMotor.setPosition(angle);
     }
 }

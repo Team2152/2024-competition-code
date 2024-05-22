@@ -4,6 +4,7 @@ import org.photonvision.common.hardware.VisionLEDMode;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -39,8 +40,7 @@ public class RobotContainer {
 
   public final LEDs m_leds;
 
-
-
+  
   public RobotContainer() {
     m_rearCamera = new Limelight(Constants.Vision.kRearCameraName, Constants.Vision.kRearRobotToCam);
     // m_frontCamera = new Limelight();
@@ -110,9 +110,15 @@ public class RobotContainer {
         () -> m_driverController.getLeftY(),
         () -> m_driverController.getLeftX(),
         () -> m_driverController.getRightX(),
-        () -> true,
+        () -> false,
         () -> m_driverController.leftTrigger().getAsBoolean()
     ));
+
+    // PathPlannerPath ampPath = PathPlannerPath.fromPathFile("Amp Aim");
+    m_driverController.a()
+      .onTrue(
+        m_drivetrain.faceHeading(180)
+      );
 
     m_driverController.start()
       .whileTrue(
@@ -128,18 +134,21 @@ public class RobotContainer {
         m_leds.setColor(OIConstants.kLedOrange)
         .andThen(m_leds.setBlink(false)));
 
+    // m_driverController.rightTrigger()
+    //   .whileTrue(m_shooter.setShooter)
+
     m_driverController.leftBumper()
       .whileTrue(m_drivetrain.zeroHeading());
 
     m_driverController.povUp()
       .whileTrue(
-        m_shooter.setPivotPower(-0.15))
+        m_shooter.setPivotPower(-0.05))
       .onFalse(
         m_shooter.setPivotPower(0));
 
     m_driverController.povDown()
       .whileTrue(
-        m_shooter.setPivotPower(0.15))
+        m_shooter.setPivotPower(0.05))
       .onFalse(
         m_shooter.setPivotPower(0));
 
@@ -219,10 +228,15 @@ public class RobotContainer {
       .onFalse(m_shooter.setFeederPower(0));
 
     m_operatorController.rightTrigger()
-    .onTrue(m_shooter.setShooterPower(ShooterConstants.kShooterOn)
-    .andThen(m_leds.setColor(Color.kPurple)))
-    .onFalse(m_shooter.setShooterPower(0)
-    .andThen(m_leds.setColor(OIConstants.kLedOrange)));
+    .onTrue(
+      m_leds.setColor(Color.kGreen)
+      .andThen(m_leds.setBlink(true))
+      .andThen(m_shooter.setShooterPower(ShooterConstants.kShooterOn))
+    )
+    .onFalse(
+      m_leds.setColor(OIConstants.kLedOrange)
+      .andThen(m_leds.setBlink(false))
+      .andThen(m_shooter.setShooterPower(0)));
   }
 
   public Command getAutonomousCommand() {
