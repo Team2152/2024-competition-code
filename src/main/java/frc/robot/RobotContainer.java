@@ -8,6 +8,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -153,14 +154,25 @@ public class RobotContainer {
         m_shooter.setPivotPower(0));
 
       m_driverController.x()
-        .whileTrue(new RunCommand(() -> {
+        .toggleOnTrue(new RunCommand(() -> {
+          m_leds.setBlink(true);
+          m_leds.setColor(Color.kGreen);
           int tagId = (DriverStation.getAlliance().get() == Alliance.Blue) ? 7 : 4;
           m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(tagId, 0.4318, m_shooter));
+          m_drivetrain.faceHeadingManual(m_drivetrain.getHeadingFromApriltag(tagId, m_drivetrain.getPose()));
+          m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
       }))
-      .onTrue(
-        m_rearCamera.setLED(VisionLEDMode.kBlink)
-        .andThen(new WaitCommand(2))
-        .andThen(m_rearCamera.setLED(VisionLEDMode.kOff)));
+      .toggleOnFalse(
+        m_leds.setBlink(false)
+        .andThen(m_leds.setColor(OIConstants.kLedOrange))
+        .andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)
+        
+        ));
+        
+      // .onTrue(
+      //   m_rearCamera.setLED(VisionLEDMode.kBlink)
+      //   .andThen(new WaitCommand(2))
+      //   .andThen(m_rearCamera.setLED(VisionLEDMode.kOff)));
 
     m_operatorController.a()
       .onTrue(

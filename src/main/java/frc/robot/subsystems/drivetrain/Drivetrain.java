@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -97,6 +98,7 @@ public class Drivetrain extends SubsystemBase {
   private PIDController rotationController;
   private boolean headingLocked;
   private double headingTarget;
+  private double rotationOffset;
 
   public Drivetrain(Limelight camera) {
     m_rearCamera = camera;
@@ -153,9 +155,10 @@ public class Drivetrain extends SubsystemBase {
     });
 
     rotationController = new PIDController(HeadingAlignConstants.kP, HeadingAlignConstants.kI, HeadingAlignConstants.kD);
-    rotationController.setTolerance(1);
+    rotationController.setTolerance(2);
     headingLocked = false;
     headingTarget = 0;
+    rotationOffset = 0;
   }
 
   public Command followPath(PathPlannerPath path) {
@@ -211,11 +214,18 @@ public class Drivetrain extends SubsystemBase {
     m_field.setRobotPose(getPose());
     
     if (headingLocked) {
-      drive(0, 0, rotationController.calculate(getHeading().getDegrees(), headingTarget)/2, false, true);
-      System.out.println("HEADING PID");
+      //drive(0, 0, rotationController.calculate(getHeading().getDegrees(), headingTarget)/2, false, true);
+      // System.out.println("HEADING PID");
+      // System.out.println("TARGET:  "+headingTarget);
+      // System.out.println("CURRENT:  " + getHeading());
+      // if (rotationController.atSetpoint()) {
+      //   headingLocked = false;
+      //   drive(0, 0, 0, false, false);
+      // }
+      rotationOffset = rotationController.calculate(getHeading().getDegrees(), headingTarget);
       if (rotationController.atSetpoint()) {
+        rotationOffset = 0;
         headingLocked = false;
-        drive(0, 0, 0, false, false);
       }
     }
   }
@@ -294,13 +304,18 @@ public class Drivetrain extends SubsystemBase {
   public void drive(double xSpeed, double ySpeed, double rot, boolean rateLimit, boolean limiterEnabled) {
     double xSpeedCommanded = xSpeed;
     double ySpeedCommanded = ySpeed;
-    double rotDelivered = rot;
+    double rotDelivered = rot + rotationOffset;
 
+    System.out.println(limiterEnabled);
     if (limiterEnabled) {
-        xSpeed /= DriveConstants.kLimiterModifier;
-        ySpeed /= DriveConstants.kLimiterModifier;
-        rot /= DriveConstants.kLimiterModifier;
+        xSpeedCommanded /= DriveConstants.kLimiterModifier;
+        ySpeedCommanded /= DriveConstants.kLimiterModifier;
+        rotDelivered /= DriveConstants.kLimiterModifier;
     }
+
+    System.out.println(xSpeed);
+    System.out.println(ySpeed);
+    System.out.println(rot);
 
     if (rateLimit) {
         double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
@@ -373,6 +388,14 @@ public class Drivetrain extends SubsystemBase {
       headingLocked = true;
       headingTarget = heading;
     });
+  }
+
+  /** 
+   * Rotates the chassis until the meeting a requested gyro angle.
+  */
+  public void faceHeadingManual(double heading) {
+    headingLocked = true;
+    headingTarget = heading;
   }
 
   public Command teleopDrive(
@@ -484,6 +507,6 @@ public class Drivetrain extends SubsystemBase {
       requestedTagPose.getX() - currentPose.getX()
     );
 
-    return headingToTarget;
+    return Units.radiansToDegrees(headingToTarget);
   }
 }
