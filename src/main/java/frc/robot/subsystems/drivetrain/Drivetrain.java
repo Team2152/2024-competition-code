@@ -306,16 +306,11 @@ public class Drivetrain extends SubsystemBase {
     double ySpeedCommanded = ySpeed;
     double rotDelivered = rot + rotationOffset;
 
-    System.out.println(limiterEnabled);
     if (limiterEnabled) {
         xSpeedCommanded /= DriveConstants.kLimiterModifier;
         ySpeedCommanded /= DriveConstants.kLimiterModifier;
         rotDelivered /= DriveConstants.kLimiterModifier;
     }
-
-    System.out.println(xSpeed);
-    System.out.println(ySpeed);
-    System.out.println(rot);
 
     if (rateLimit) {
         double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
@@ -489,12 +484,6 @@ public class Drivetrain extends SubsystemBase {
 
       double factor = (distanceToTarget - AutoAimConstants.kClosestDistance) / (AutoAimConstants.kFarthestDistance - AutoAimConstants.kClosestDistance);
       double angleRequired = AutoAimConstants.kClosestAngle + factor * (AutoAimConstants.kFarthestAngle - AutoAimConstants.kClosestAngle);
-
-    
-      System.out.println("Angle Required" + angleRequired);
-      System.out.println("Current Pose: " + currentPose.toString());
-      System.out.println("Target Distance: " + distanceToTarget);
-      System.out.println("\n");
 
       return angleRequired;
   }
