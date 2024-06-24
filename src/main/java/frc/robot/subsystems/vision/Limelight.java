@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.vision;
 
 import java.util.Optional;
 
@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -25,18 +24,20 @@ public class Limelight extends SubsystemBase {
     public PhotonPipelineResult result;
     public PhotonPoseEstimator m_photonEstimator;
 
-    public Limelight(String cameraName, Transform3d RobotToCam) {
+    private Matrix<N3, N1> kSingleTagStdDevs;
+    private Matrix<N3, N1> kMultiTagStdDevs;
+
+    public Limelight(String cameraName, Transform3d cameraOffset, Matrix<N3, N1> singleTagStdDevs, Matrix<N3, N1> multiTagStdDevs) {
+        kSingleTagStdDevs = singleTagStdDevs;
+        kMultiTagStdDevs = multiTagStdDevs;
         m_camera = new PhotonCamera(cameraName);
         m_photonEstimator = new PhotonPoseEstimator(
-            Constants.Vision.kTagLayout, 
+            Constants.VisionConstants.kTagLayout, 
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, 
             m_camera,
-            RobotToCam);
+            cameraOffset);
 
         m_photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
-
-        SmartDashboard.putNumber("LL Pipeline Index", m_camera.getPipelineIndex());
-        //m_camera.setLED(VisionLEDMode.kBlink);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class Limelight extends SubsystemBase {
     }
 
     public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
-        var estStdDevs = Constants.Vision.kSingleTagStdDevs;
+        var estStdDevs = kSingleTagStdDevs;
         var targets = result.getTargets();
         int numTags = 0;
         double avgDist = 0;
@@ -75,7 +76,7 @@ public class Limelight extends SubsystemBase {
         }
         if (numTags == 0) return estStdDevs;
         avgDist /= numTags;
-        if (numTags > 1) estStdDevs = Constants.Vision.kMultiTagStdDevs;
+        if (numTags > 1) estStdDevs = kMultiTagStdDevs;
         if (numTags == 1 && avgDist > 4) estStdDevs =
             VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE); else estStdDevs =
             estStdDevs.times(1 + (avgDist * avgDist / 30));

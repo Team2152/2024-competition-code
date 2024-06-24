@@ -2,23 +2,17 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.OIConstants;
 
 public class LEDs extends SubsystemBase {
     private final AddressableLED m_leds;
     private final AddressableLEDBuffer m_ledBuffer;
 
-    private Color curColor = OIConstants.kLedOrange;
-    private Color activeColor = curColor;
-
-    private double currentTime;
-    private double lastTime;
+    private Color curColor = OIConstants.LedColors.kDefault;
 
     private boolean blinkEnabled = false;
     private boolean blinking = false;
@@ -59,15 +53,7 @@ public class LEDs extends SubsystemBase {
                 m_ledBuffer.setLED(i, Color.kBlack);
             }
         }
-
-        // currentTime = Timer.getFPGATimestamp();
-        // if (lastTime - currentTime >= 0.3) {
-        //     lastTime = currentTime;
-        //     cycleOn = true;
-        // } else {
-        //     cycleOn = false;
-        // }
-
+        
         SmartDashboard.putString("LedColor", curColor.toHexString());
     }
 

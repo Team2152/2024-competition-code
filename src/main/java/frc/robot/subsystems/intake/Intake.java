@@ -1,63 +1,43 @@
 package frc.robot.subsystems.intake;
 
-import com.ctre.phoenix6.StatusSignal;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import frc.robot.Constants.IntakeConstants;
 
-
-public class Intake extends SubsystemBase { 
-    private final IntakePivot m_intakePivot;
-    private final IntakeRollers m_intakeRollers;
-    private final DigitalInput m_noteLimitSwitch;
+public class Intake extends SubsystemBase{
+    private IntakeRollers m_rollers;
+    private IntakePivot m_pivot;
 
     public Intake() {
-        m_intakePivot = new IntakePivot(IntakeConstants.kPivotCanId, 15);
-        m_intakeRollers = new IntakeRollers(IntakeConstants.kIntakeCanId); 
-        m_noteLimitSwitch = new DigitalInput(IntakeConstants.kIntakeNoteLsPort);     
+        m_rollers = new IntakeRollers(IntakeConstants.kIntakeCanId);
+        m_pivot = new IntakePivot(IntakeConstants.kPivotCanId, IntakeConstants.kPivotRatio);
     }
 
-    @Override
-    public void periodic() {
-        if (getNoteDetected() && SmartDashboard.getBoolean("Note Detection", true)) {
-            setIntakePower(0);
-            setIntakeAngle(IntakeConstants.kIntakeSetpointIn);
-        }
+    public Command setRollerCmd(double speed) {
+        return runOnce(() ->
+            setRoller(speed)
+        );
     }
 
-    public double getIntakeAngleDouble() {
-        return m_intakePivot.getIntakeAngle().getValueAsDouble();
+    public Command setRollerCmdEnd(double speed) {
+        return runEnd(
+            () -> setRoller(speed),
+            () -> setRoller(0)
+        ); 
     }
 
-    public StatusSignal<Double> getIntakeAngleRaw() {
-        return m_intakePivot.getIntakeAngle();
+    public void setRoller(double speed) {
+        m_rollers.set(speed);
     }
 
-    public double getIntakePower() {
-        return m_intakeRollers.getIntakePower();
+    
+    public Command setPivotCmd(double angle) {
+        return runOnce(() ->
+            setPivot(angle)
+        );
     }
 
-    public Boolean getNoteDetected() {
-        return m_noteLimitSwitch.get();
-    }
-
-    public Command setIntakeAngle(double angle) {
-        return m_intakePivot.setIntakeAngle(angle);
-    }
-
-    public Command setIntakePower(double power) {
-        return m_intakeRollers.setIntakePower(power);
-    }
-
-    public Command setIntakePowerWithChecks(double power) {
-        return m_intakeRollers.setIntakePowerWithChecks(power, getNoteDetected());
-    }
-
-    public Command setIntakePowerConstant(double power) {
-        return m_intakeRollers.setIntakePowerConstant(power);
+    public void setPivot(double angle) {
+        m_pivot.set(angle);
     }
 }

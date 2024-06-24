@@ -1,88 +1,74 @@
 package frc.robot.subsystems.shooter;
 
-import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix6.StatusSignal;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 
-public class Shooter extends SubsystemBase {
-    private final ShooterPivot m_shooterPivot;
-    private final FeederWheels m_feederWheels;
-    private final ShooterWheels m_shooterWheels;
-
-    private final DigitalInput m_limitSwitch;
+public class Shooter extends SubsystemBase{
+    private FeederBelts m_feeder;
+    private ShooterWheels m_flywheels;
+    private ShooterPivot m_pivot;
 
     public Shooter() {
-        m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId,62.91);
-        m_feederWheels = new FeederWheels(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
-        m_shooterWheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
-        m_limitSwitch = new DigitalInput(9);
+        m_feeder = new FeederBelts(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
+        m_flywheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
+        m_pivot = new ShooterPivot(ShooterConstants.kPivotCanId, ShooterConstants.kPivotRatio);
     }
 
-    @Override
-    public void periodic() {
-        if (!m_limitSwitch.get()) {
-            m_shooterPivot.resetPivotMotorManual(0);
-
-        } 
-        SmartDashboard.putBoolean("Shooter Limitswitch", !m_limitSwitch.get());
+    public Command setFeederCmd(double speed) {
+        return runOnce(() ->
+            setFeeder(speed)
+        );
     }
 
-    public Command setPivotPower(double power) {
-        return m_shooterPivot.setPivotPower(power);
+    public Command setFeederCmdEnd(double speed) {
+        return runEnd(
+            () -> setFeeder(speed),
+            () -> setFeeder(0)
+        ); 
     }
 
-    public Command setShooterAngle(double angle) {
-        return m_shooterPivot.setShooterAngle(angle);
+    public void setFeeder(double speed) {
+        m_feeder.set(speed);
     }
 
-    public void setShooterAngleManual(double angle) {
-        m_shooterPivot.setShooterAngleManual(angle);
+
+    public Command setShooterCmd(double speed, double bias) {
+        return runOnce(() ->
+            setShooter(speed, bias)
+        );
     }
 
-    public Command setFeederPower(double power) {
-        return m_feederWheels.setFeederPower(power);
+    public Command setShooterCmdEnd(double speed, double bias) {
+        return runEnd(
+            () -> setShooter(speed, bias),
+            () -> setShooter(0, 0)
+        ); 
     }
 
-    public Command setFeederPowerConstant(double power) {
-        return m_feederWheels.setFeederPowerConstant(power);
+    public void setShooter(double speed, double bias) {
+        m_flywheels.set(speed, bias);
     }
 
-    public Command setShooterPowerConstant(double power) {
-        return m_shooterWheels.setShooterPowerConstant(power);
+    
+    public Command setPivotCmd(double angle) {
+        return runOnce(() ->
+            setPivot(angle)
+        );
     }
 
-    public Command setShooterPower(double power) {
-        return m_shooterWheels.setShooterPower(power);
+    public void setPivot(double angle) {
+        m_pivot.set(angle);
     }
 
-    public double getShooterAngleDouble() {
-        return m_shooterPivot.getShooterAngle().getValueAsDouble();
+
+    public void setPower(double power) {
+        m_pivot.setPower(power);
     }
 
-    public StatusSignal<Double> getShooterAngleRaw() {
-        return m_shooterPivot.getShooterAngle();
-    }
-
-    public double getFeederPower() {
-        return m_feederWheels.getFeederPower();
-    }
-
-    public double getShooterPower() {
-        return m_shooterWheels.getShooterPower();
-    }
-
-    public Command setShooterAngleSupplier(DoubleSupplier angle) {
-        return m_shooterPivot.setShooterAngle(angle.getAsDouble());
-    }
-
-    public Command resetPivotMotor(double angle) {
-        return m_shooterPivot.resetPivotMotor(angle);
+    public Command setPowerCmd(double power) {
+        return runOnce(() -> 
+            m_pivot.setPower(power)
+        );
     }
 }

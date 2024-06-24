@@ -11,6 +11,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
+import frc.robot.Constants.AmpLimits;
 import frc.robot.Constants.ModuleConstants;
 
 public class SwerveModule {
@@ -26,6 +27,16 @@ public class SwerveModule {
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
+  private final double kDrivingEncoderPositionFactor = (ModuleConstants.kWheelDiameterMeters * Math.PI)
+    / ModuleConstants.kDrivingMotorReduction; // meters
+  private final double kDrivingEncoderVelocityFactor = ((ModuleConstants.kWheelDiameterMeters * Math.PI)
+    / ModuleConstants.kDrivingMotorReduction) / 60.0; // meters per second
+
+  private final double kTurningEncoderPositionFactor = (2 * Math.PI); // radians
+  private final double kTurningEncoderVelocityFactor = (2 * Math.PI) / 60.0; // radians per second
+
+  private final double kTurningEncoderPositionPIDMinInput = 0; // radians
+  private final double kTurningEncoderPositionPIDMaxInput = kTurningEncoderPositionFactor; // radians
 
   public SwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     m_drivingSparkMax = new CANSparkMax(drivingCANId, MotorType.kBrushless);
@@ -33,7 +44,7 @@ public class SwerveModule {
 
     m_drivingSparkMax.restoreFactoryDefaults();
     m_turningSparkMax.restoreFactoryDefaults();
-
+ 
     m_drivingEncoder = m_drivingSparkMax.getEncoder();
     m_turningEncoder = m_turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
     m_drivingPIDController = m_drivingSparkMax.getPIDController();
@@ -41,17 +52,17 @@ public class SwerveModule {
     m_drivingPIDController.setFeedbackDevice(m_drivingEncoder);
     m_turningPIDController.setFeedbackDevice(m_turningEncoder);
 
-    m_drivingEncoder.setPositionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor);
-    m_drivingEncoder.setVelocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
+    m_drivingEncoder.setPositionConversionFactor(kDrivingEncoderPositionFactor);
+    m_drivingEncoder.setVelocityConversionFactor(kDrivingEncoderVelocityFactor);
 
-    m_turningEncoder.setPositionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor);
-    m_turningEncoder.setVelocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor);
+    m_turningEncoder.setPositionConversionFactor(kTurningEncoderPositionFactor);
+    m_turningEncoder.setVelocityConversionFactor(kTurningEncoderVelocityFactor);
 
     m_turningEncoder.setInverted(ModuleConstants.kTurningEncoderInverted);
 
     m_turningPIDController.setPositionPIDWrappingEnabled(true);
-    m_turningPIDController.setPositionPIDWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput);
-    m_turningPIDController.setPositionPIDWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput);
+    m_turningPIDController.setPositionPIDWrappingMinInput(kTurningEncoderPositionPIDMinInput);
+    m_turningPIDController.setPositionPIDWrappingMaxInput(kTurningEncoderPositionPIDMaxInput);
 
     m_drivingPIDController.setP(ModuleConstants.kDrivingP);
     m_drivingPIDController.setI(ModuleConstants.kDrivingI);
@@ -69,8 +80,8 @@ public class SwerveModule {
 
     m_drivingSparkMax.setIdleMode(ModuleConstants.kDrivingMotorIdleMode);
     m_turningSparkMax.setIdleMode(ModuleConstants.kTurningMotorIdleMode);
-    m_drivingSparkMax.setSmartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
-    m_turningSparkMax.setSmartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
+    m_drivingSparkMax.setSmartCurrentLimit(AmpLimits.kSwerveDrive);
+    m_turningSparkMax.setSmartCurrentLimit(AmpLimits.kSwerveSteer);
 
     m_drivingSparkMax.burnFlash();
     m_turningSparkMax.burnFlash();

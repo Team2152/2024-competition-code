@@ -5,9 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,21 +14,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.WPIUtilJNI;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.Constants;
-import frc.robot.Constants.AutoAimConstants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.HeadingAlignConstants;
+import frc.robot.Constants.AutonomousConstants;
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.Vision;
-import frc.robot.subsystems.Limelight;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.utils.SwerveUtils;
+import frc.robot.subsystems.vision.Limelight;
+import frc.utils.Helpers;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -51,111 +40,76 @@ import org.photonvision.EstimatedRobotPose;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drivetrain extends SubsystemBase {
   private final SwerveModule m_frontLeft = new SwerveModule(
-      DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId,
-      DriveConstants.kFrontLeftChassisAngularOffset);
+    DrivetrainConstants.kFrontLeftDrivingCanId,
+    DrivetrainConstants.kFrontLeftTurningCanId,
+    DrivetrainConstants.kFrontLeftChassisAngularOffset);
 
   private final SwerveModule m_frontRight = new SwerveModule(
-      DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId,
-      DriveConstants.kFrontRightChassisAngularOffset);
+    DrivetrainConstants.kFrontRightDrivingCanId,
+    DrivetrainConstants.kFrontRightTurningCanId,
+    DrivetrainConstants.kFrontRightChassisAngularOffset);
 
   private final SwerveModule m_rearLeft = new SwerveModule(
-      DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId,
-      DriveConstants.kBackLeftChassisAngularOffset);
+    DrivetrainConstants.kRearLeftDrivingCanId,
+    DrivetrainConstants.kRearLeftTurningCanId,
+    DrivetrainConstants.kBackLeftChassisAngularOffset);
 
   private final SwerveModule m_rearRight = new SwerveModule(
-      DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId,
-      DriveConstants.kBackRightChassisAngularOffset);
+    DrivetrainConstants.kRearRightDrivingCanId,
+    DrivetrainConstants.kRearRightTurningCanId,
+    DrivetrainConstants.kBackRightChassisAngularOffset);
 
 
-  private AHRS m_gyro = new AHRS(SPI.Port.kMXP);
-  
-  private double m_currentRotation = 0.0;
-  private double m_currentTranslationDir = 0.0;
-  private double m_currentTranslationMag = 0.0;
-
-  private SlewRateLimiter m_magLimiter = new SlewRateLimiter(DriveConstants.kMagnitudeSlewRate);
-  private SlewRateLimiter m_rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
-  private double m_prevTime = WPIUtilJNI.now() * 1e-6;
-
+  private AHRS m_gyro;
+  private Field2d m_field;
   private SwerveDrivePoseEstimator m_poseEstimator;
-  private Pose2d lastPose = null;
 
-  private final Field2d m_field = new Field2d();
-  
-  private final Limelight m_rearCamera;
+  private Limelight m_rearCamera;
+  private Pose2d lastPose;
 
   private PIDController rotationController;
   private boolean headingLocked;
   private double headingTarget;
   private double rotationOffset;
 
-  public Drivetrain(Limelight camera) {
-    m_rearCamera = camera;
-    AutoBuilder.configureHolonomic(
-      this::getPose,
-      this::resetPose,
-      this::getChassisSpeeds,
-      this::setChassisSpeeds,
-      new HolonomicPathFollowerConfig(
-        new PIDConstants(5, 0, 0),
-        new PIDConstants(5, 0, 0),
-        DriveConstants.kMaxSpeedMetersPerSecond,
-        (DriveConstants.kWheelBase / 39.37 ) / 2,
-        new ReplanningConfig()
-      ),
-      () -> {
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-          return alliance.get() == DriverStation.Alliance.Red;
-        }
-        return false;
-      },
-      this
-    );
-    
+  public Drivetrain(Limelight m_rearCamera) {
+      AutoBuilder.configureHolonomic(
+        this::getPose,
+        this::resetPose,
+        this::getChassisSpeeds,
+        this::setChassisSpeeds,
+        new HolonomicPathFollowerConfig(
+          new PIDConstants(5, 0, 0),
+          new PIDConstants(5, 0, 0),
+          AutonomousConstants.kMaxSpeedMetersPerSecond,
+          ((DrivetrainConstants.kWheelBase > DrivetrainConstants.kTrackWidth) ? DrivetrainConstants.kWheelBase : DrivetrainConstants.kTrackWidth) / 2,
+          new ReplanningConfig()
+        ),
+        () -> Helpers.isRedAlliance(),
+        this
+      );
+
     m_poseEstimator = new SwerveDrivePoseEstimator(
-      DriveConstants.kDriveKinematics,
-      getHeading(),
-      getModulePositions(),
-      new Pose2d()
+      DrivetrainConstants.kDriveKinematics, 
+      getHeading(), 
+      getModulePositions(), 
+      getPose()
     );
 
     SmartDashboard.putData("Field", m_field);
+    Helpers.sendSwerveWidget(m_frontLeft, m_frontRight, m_rearLeft, m_rearRight, m_gyro);
 
-    SmartDashboard.putData("Swerve Drive", new Sendable() {
-      @Override
-      public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("SwerveDrive");
+    m_gyro = new AHRS(SPI.Port.kMXP);
+    m_field = new Field2d();
 
-        builder.addDoubleProperty("Front Left Angle", () -> m_frontLeft.getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Front Left Velocity", () -> m_frontLeft.getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Front Right Angle", () -> m_frontRight.getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Front Right Velocity", () -> m_frontRight.getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Back Left Angle", () -> m_rearLeft.getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Back Left Velocity", () -> m_rearLeft.getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Back Right Angle", () -> m_rearRight.getState().angle.getRadians(), null);
-        builder.addDoubleProperty("Back Right Velocity", () -> m_rearRight.getState().speedMetersPerSecond, null);
-
-        builder.addDoubleProperty("Robot Angle", () -> m_gyro.getRotation2d().getRadians(), null);
-      }
-    });
-
-    rotationController = new PIDController(HeadingAlignConstants.kP, HeadingAlignConstants.kI, HeadingAlignConstants.kD);
-    rotationController.setTolerance(2);
+    rotationController = new PIDController(AutonomousConstants.kAzimuthP, AutonomousConstants.kAzimuthI, AutonomousConstants.kAzimuthD);
+    rotationController.setTolerance(AutonomousConstants.kAzimuthTolerance);
     headingLocked = false;
     headingTarget = 0;
     rotationOffset = 0;
@@ -179,17 +133,6 @@ public class Drivetrain extends SubsystemBase {
     return path;
   }
 
-  public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
-    driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
-  }
-
-  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
-    ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
-    SwerveModuleState[] targetStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(targetSpeeds);
-    setModuleStates(targetStates);
-  }
-
-
   @Override
   public void periodic() {
     m_poseEstimator.update(getHeading(), getModulePositions());
@@ -209,19 +152,10 @@ public class Drivetrain extends SubsystemBase {
         );
       }
     }
-  
 
     m_field.setRobotPose(getPose());
     
     if (headingLocked) {
-      //drive(0, 0, rotationController.calculate(getHeading().getDegrees(), headingTarget)/2, false, true);
-      // System.out.println("HEADING PID");
-      // System.out.println("TARGET:  "+headingTarget);
-      // System.out.println("CURRENT:  " + getHeading());
-      // if (rotationController.atSetpoint()) {
-      //   headingLocked = false;
-      //   drive(0, 0, 0, false, false);
-      // }
       rotationOffset = rotationController.calculate(getHeading().getDegrees(), headingTarget);
       if (rotationController.atSetpoint()) {
         rotationOffset = 0;
@@ -239,45 +173,23 @@ public class Drivetrain extends SubsystemBase {
     };
   }
 
-
-  /**
-   * Returns the current chassis speed of the robot.
-   *
-   * @return The chassis speed.
-   */
   public ChassisSpeeds getChassisSpeeds() {
-    return DriveConstants.kDriveKinematics.toChassisSpeeds(
+    return DrivetrainConstants.kDriveKinematics.toChassisSpeeds(
         m_frontLeft.getState(),
         m_frontRight.getState(),
         m_rearLeft.getState(),
         m_rearRight.getState());
   }
 
-  /**
-   * Changes the current chassis speed of the robot.
-   *
-   * @param speeds Sets the chassis speed.
-   */
   public void setChassisSpeeds(ChassisSpeeds speeds) {
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+    var swerveModuleStates = DrivetrainConstants.kDriveKinematics.toSwerveModuleStates(speeds);
     setModuleStates(swerveModuleStates);
   }
 
-  /**
-   * Returns the currently-estimated pose of the robot.
-   *
-   * @return The pose.
-   */
   public Pose2d getPose() {
-    //return m_odometry.getPoseMeters();
     return m_poseEstimator.getEstimatedPosition();
   }
 
-  /**
-   * Resets the odometry to the specified pose.
-   *
-   * @param pose The pose to which to set the odometry.
-   */
   public void resetPose(Pose2d pose) {
     m_poseEstimator.resetPosition(
         getHeading(),
@@ -290,87 +202,44 @@ public class Drivetrain extends SubsystemBase {
         pose);
   }
 
-  /**
-   * Method to drive the robot using joystick info.
-   *
-   * @param xSpeed        Speed of the robot in the x direction (forward).
-   * @param ySpeed        Speed of the robot in the y direction (sideways).
-   * @param rot           Angular rate of the robot.
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
-   * @param rateLimit     Whether to enable rate limiting for smoother control.
-   * @param limiterEnabled Whether to limit the driving speed or not
-   */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean rateLimit, boolean limiterEnabled) {
+  public void drive(double xSpeed, double ySpeed, double rot, boolean limiterEnabled) {
     double xSpeedCommanded = xSpeed;
     double ySpeedCommanded = ySpeed;
     double rotDelivered = rot + rotationOffset;
-
-    System.out.println(limiterEnabled);
+    
     if (limiterEnabled) {
-        xSpeedCommanded /= DriveConstants.kLimiterModifier;
-        ySpeedCommanded /= DriveConstants.kLimiterModifier;
-        rotDelivered /= DriveConstants.kLimiterModifier;
+        xSpeedCommanded /= OIConstants.kSpeedLimiterModifier;
+        ySpeedCommanded /= OIConstants.kSpeedLimiterModifier;
+        rotDelivered /= OIConstants.kSpeedLimiterModifier;
     }
 
-    System.out.println(xSpeed);
-    System.out.println(ySpeed);
-    System.out.println(rot);
+    xSpeedCommanded *= ModuleConstants.kMaxSpeedMetersPerSecond;
+    ySpeedCommanded *= ModuleConstants.kMaxSpeedMetersPerSecond;
+    rotDelivered *= DrivetrainConstants.kMaxAngularSpeed;
 
-    if (rateLimit) {
-        double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
-        double inputTranslationMag = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2));
-
-        double directionSlewRate;
-        if (m_currentTranslationMag != 0.0) {
-            directionSlewRate = Math.abs(DriveConstants.kDirectionSlewRate / m_currentTranslationMag);
-        } else {
-            directionSlewRate = 500.0;
-        }
-
-        double currentTime = WPIUtilJNI.now() * 1e-6;
-        double elapsedTime = currentTime - m_prevTime;
-        double angleDif = SwerveUtils.AngleDifference(inputTranslationDir, m_currentTranslationDir);
-        if (angleDif < 0.45 * Math.PI) {
-            m_currentTranslationDir = SwerveUtils.StepTowardsCircular(m_currentTranslationDir, inputTranslationDir, directionSlewRate * elapsedTime);
-            m_currentTranslationMag = m_magLimiter.calculate(inputTranslationMag);
-        } else if (angleDif > 0.85 * Math.PI) {
-            if (m_currentTranslationMag > 1e-4) {
-                m_currentTranslationMag = m_magLimiter.calculate(0.0);
-            } else {
-                m_currentTranslationDir = SwerveUtils.WrapAngle(m_currentTranslationDir + Math.PI);
-                m_currentTranslationMag = m_magLimiter.calculate(inputTranslationMag);
-            }
-        } else {
-            m_currentTranslationDir = SwerveUtils.StepTowardsCircular(m_currentTranslationDir, inputTranslationDir, directionSlewRate * elapsedTime);
-            m_currentTranslationMag = m_magLimiter.calculate(0.0);
-        }
-        m_prevTime = currentTime;
-
-        xSpeedCommanded = m_currentTranslationMag * Math.cos(m_currentTranslationDir);
-        ySpeedCommanded = m_currentTranslationMag * Math.sin(m_currentTranslationDir);
-        rotDelivered = m_rotLimiter.calculate(rot);
-    }
-
-    // Final speed calculations
-    xSpeedCommanded *= DriveConstants.kMaxSpeedMetersPerSecond;
-    ySpeedCommanded *= DriveConstants.kMaxSpeedMetersPerSecond;
-    rotDelivered *= DriveConstants.kMaxAngularSpeed;
-
-    // Set module states
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
+    var swerveModuleStates = DrivetrainConstants.kDriveKinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedCommanded, ySpeedCommanded, rotDelivered, getHeading()));
     SwerveDriveKinematics.desaturateWheelSpeeds(
-            swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+            swerveModuleStates, ModuleConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
   }
 
-  /**
-   * Sets the wheels into an X formation to prevent movement.
-   */
+  public Command teleopDrive(
+    DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot, BooleanSupplier speedLimiter) {
+      return run(() -> {
+          double xVal = -MathUtil.applyDeadband(x.getAsDouble(), OIConstants.kDriveDeadband);
+          double yVal = -MathUtil.applyDeadband(y.getAsDouble(), OIConstants.kDriveDeadband);
+          double rotVal = -MathUtil.applyDeadband(rot.getAsDouble(), OIConstants.kDriveDeadband);
+
+          boolean speedLimiterVal = speedLimiter.getAsBoolean();
+
+          drive(xVal, yVal, rotVal, speedLimiterVal);
+      });
+  }
+
   public Command setX() {
     return run(() -> {
       m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
@@ -380,55 +249,30 @@ public class Drivetrain extends SubsystemBase {
     });
   }
 
-  /** 
-   * Rotates the chassis until the meeting a requested gyro angle.
-  */
-  public Command faceHeading(double heading) {
-    return run(() -> {
-      headingLocked = true;
-      headingTarget = heading;
-    });
-  }
-
-  /** 
-   * Rotates the chassis until the meeting a requested gyro angle.
-  */
-  public void faceHeadingManual(double heading) {
+  private void setHeadingLock(double heading) {
     headingLocked = true;
     headingTarget = heading;
   }
 
-  public Command teleopDrive(
-    DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot,
-    BooleanSupplier rateLimiter, BooleanSupplier speedLimiter) {
-      return run(() -> {
-          double xVal = -MathUtil.applyDeadband(x.getAsDouble(), OIConstants.kDriveDeadband);
-          double yVal = -MathUtil.applyDeadband(y.getAsDouble(), OIConstants.kDriveDeadband);
-          double rotVal = -MathUtil.applyDeadband(rot.getAsDouble(), OIConstants.kDriveDeadband);
-
-          boolean rateLimiterVal = rateLimiter.getAsBoolean();
-          boolean speedLimiterVal = speedLimiter.getAsBoolean();
-
-          drive(xVal, yVal, rotVal, rateLimiterVal, speedLimiterVal);
-      });
+  public Command faceHeadingCommand(double heading) {
+    return run(() -> {
+      setHeadingLock(heading);
+    });
   }
 
+  public void faceHeading(double heading) {
+    setHeadingLock(heading);
+  }
 
-  /**
-   * Sets the swerve ModuleStates.
-   *
-   * @param desiredStates The desired SwerveModule states.
-   */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, DriveConstants.kMaxSpeedMetersPerSecond);
+        desiredStates, ModuleConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(desiredStates[0]);
     m_frontRight.setDesiredState(desiredStates[1]);
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
   }
 
-  /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
     m_frontLeft.resetEncoders();
     m_rearLeft.resetEncoders();
@@ -436,77 +280,11 @@ public class Drivetrain extends SubsystemBase {
     m_rearRight.resetEncoders();
   }
 
-  /** Zeroes the heading of the robot. */
-  public Command zeroHeading() {
-    return run(() -> {m_gyro.reset();});
+  public Command zeroHeadingCmd() {
+    return runOnce(() -> {m_gyro.reset();});
   }
 
-  /**
-   * Returns the heading of the robot.
-   *
-   * @return the robot's heading in degrees, from -180 to 180
-   */
   public Rotation2d getHeading() {
     return m_gyro.getRotation2d();
-  }
-
-  /**
-   * Returns the turn rate of the robot.
-   *
-   * @return The turn rate of the robot, in degrees per second
-   */
-  public double getTurnRate() {
-    return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
-  }
-
-  public double getAngleToSpeakerApriltag(int apriltagId, double heightOffset, Shooter m_shooter) {
-      Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
-      Pose2d currentPose = getPose();
-        // tag 7 = blue speaker
-        // tag 4 = red speaker 
-        // tag 3 = testing red speaker
-          // double headingToTarget = Math.atan2(
-          //     requestedTagPose.getY() - currentPose.getY(),
-          //     requestedTagPose.getX() - currentPose.getX()
-          // );
-
-          // double angleToTarget = Math.atan2(
-          //     requestedTagPose.getZ() - ShooterConstants.kShooterHeight,
-          //     requestedTagPose.getX() - currentPose.getX()
-          // );
-
-      double distanceToTarget = Math.sqrt(
-        Math.pow(currentPose.getX() - requestedTagPose.getX(), 2) +
-        Math.pow(currentPose.getY() - requestedTagPose.getY(), 2) +
-        Math.pow(ShooterConstants.kShooterHeight - requestedTagPose.getZ(), 2)
-      );
-
-      if (distanceToTarget < AutoAimConstants.kClosestDistance) {
-        distanceToTarget = AutoAimConstants.kClosestDistance;
-      } else if (distanceToTarget > AutoAimConstants.kFarthestDistance) {
-        distanceToTarget = AutoAimConstants.kFarthestDistance;
-      }
-
-      double factor = (distanceToTarget - AutoAimConstants.kClosestDistance) / (AutoAimConstants.kFarthestDistance - AutoAimConstants.kClosestDistance);
-      double angleRequired = AutoAimConstants.kClosestAngle + factor * (AutoAimConstants.kFarthestAngle - AutoAimConstants.kClosestAngle);
-
-    
-      System.out.println("Angle Required" + angleRequired);
-      System.out.println("Current Pose: " + currentPose.toString());
-      System.out.println("Target Distance: " + distanceToTarget);
-      System.out.println("\n");
-
-      return angleRequired;
-  }
-
-  public double getHeadingFromApriltag(int apriltagId, Pose2d currentPose) {
-    Pose3d requestedTagPose = Constants.Vision.kTagLayout.getTagPose(apriltagId).get();
-
-    double headingToTarget = Math.atan2(
-      requestedTagPose.getY() - currentPose.getY(),
-      requestedTagPose.getX() - currentPose.getX()
-    );
-
-    return Units.radiansToDegrees(headingToTarget);
   }
 }
