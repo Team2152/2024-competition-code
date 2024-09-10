@@ -2,6 +2,8 @@ package frc.robot;
 
 import org.photonvision.common.hardware.VisionLEDMode;
 
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -21,6 +23,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.NoteTracking;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.ShooterConstants;
@@ -28,10 +31,13 @@ import frc.robot.Constants.ShooterConstants;
 public class RobotContainer {
   // public final Limelight m_frontCamera;
   public final Limelight m_rearCamera;
+  public final NoteTracking m_noteTracking;
 
   public final Drivetrain m_drivetrain;
   public final Intake m_intake;
   public final Shooter m_shooter;
+
+
 
   public final SendableChooser<Command> m_autoChooser;
 
@@ -41,12 +47,15 @@ public class RobotContainer {
 
   public final LEDs m_leds;
 
+  // public final Orchestra m_music;
+
   
   public RobotContainer() {
     m_rearCamera = new Limelight(Constants.Vision.kRearCameraName, Constants.Vision.kRearRobotToCam);
+    m_noteTracking = new NoteTracking();
     // m_frontCamera = new Limelight();
 
-    m_drivetrain = new Drivetrain(m_rearCamera);
+    m_drivetrain = new Drivetrain(m_rearCamera, m_noteTracking);
     m_intake = new Intake();
     m_shooter = new Shooter();
 
@@ -101,6 +110,14 @@ public class RobotContainer {
     m_driverController = new CommandXboxController(Constants.OIConstants.kDriverControllerPort);
     m_operatorController = new CommandXboxController(1);
 
+    // m_music = new Orchestra();
+    // m_music.loadMusic("music/tetris.chrp");
+    // m_music.addInstrument(m_shooter.m_shooterPivot.m_pivotMotor);
+    // m_music.addInstrument(m_intake.m_intakePivot.m_pivotMotor);
+    // m_music.addInstrument(m_shooter.m_shooterWheels.m_leftShooterMotor);
+    // m_music.addInstrument(m_shooter.m_shooterWheels.m_rightShooterMotor);
+    // m_music.play();
+
     configureBindings();
   }
 
@@ -111,15 +128,18 @@ public class RobotContainer {
         () -> m_driverController.getLeftY(),
         () -> m_driverController.getLeftX(),
         () -> m_driverController.getRightX(),
-        () -> false,
         () -> m_driverController.leftTrigger().getAsBoolean()
     ));
 
     // PathPlannerPath ampPath = PathPlannerPath.fromPathFile("Amp Aim");
-    m_driverController.a()
-      .onTrue(
-        m_drivetrain.faceHeading(180)
-      );
+    // m_driverController.a()
+    //   .onTrue(
+    //     new RunCommand(() -> {
+    //       m_music.stop();
+    //       m_music.loadMusic("music/tetris.chrp");
+    //       m_music.play();
+    //     })
+    //   );
 
     m_driverController.start()
       .whileTrue(
@@ -160,14 +180,27 @@ public class RobotContainer {
           int tagId = (DriverStation.getAlliance().get() == Alliance.Blue) ? 7 : 4;
           m_shooter.setShooterAngleManual(-m_drivetrain.getAngleToSpeakerApriltag(tagId, 0.4318, m_shooter));
           m_drivetrain.faceHeadingManual(m_drivetrain.getHeadingFromApriltag(tagId, m_drivetrain.getPose()));
-          m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+          m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.25);
+          m_operatorController.getHID().setRumble(RumbleType.kRightRumble, 0.25);
+          SmartDashboard.putBoolean("AUTO AIM", true);
       }))
       .toggleOnFalse(
         m_leds.setBlink(false)
         .andThen(m_leds.setColor(OIConstants.kLedOrange))
-        .andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)
+        .andThen(() -> {m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0);
+          m_operatorController.getHID().setRumble(RumbleType.kBothRumble, 0);
+        SmartDashboard.putBoolean("AUTO AIM", false);}
         
         ));
+
+        m_driverController.y()
+          .onTrue(m_noteTracking.toggleCmd());
+
+        m_driverController.b()
+          .toggleOnTrue(new RunCommand(() -> {
+            int ampRotation = DriverStation.getAlliance().get() == Alliance.Blue ? 90 : -90;
+            m_drivetrain.faceHeadingManual(ampRotation);
+          }));
         
       // .onTrue(
       //   m_rearCamera.setLED(VisionLEDMode.kBlink)

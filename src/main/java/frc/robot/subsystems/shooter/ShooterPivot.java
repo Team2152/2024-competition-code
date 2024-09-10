@@ -27,7 +27,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Limelight;
 
 public class ShooterPivot extends SubsystemBase{
-    private final TalonFX m_pivotMotor;
+    public final TalonFX m_pivotMotor;
     private final TalonFXConfiguration m_pivotMotorConfigs;
     private final MotionMagicVoltage m_request;
 

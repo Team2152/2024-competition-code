@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakePivot extends SubsystemBase{
-    private final TalonFX m_pivotMotor;
+    public final TalonFX m_pivotMotor;
     private final TalonFXConfiguration m_pivotMotorConfigs;
     private final MotionMagicVoltage m_request;
 

@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 
 public class Shooter extends SubsystemBase {
-    private final ShooterPivot m_shooterPivot;
+    public final ShooterPivot m_shooterPivot;
     private final FeederWheels m_feederWheels;
-    private final ShooterWheels m_shooterWheels;
+    public final ShooterWheels m_shooterWheels;
 
     private final DigitalInput m_limitSwitch;
 

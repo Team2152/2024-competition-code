@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterWheels extends SubsystemBase{
-  private final TalonFX m_leftShooterMotor;
-  private final TalonFX m_rightShooterMotor;
+  public final TalonFX m_leftShooterMotor;
+  public final TalonFX m_rightShooterMotor;
   // private final Follower m_shooterFollower;
 
   public ShooterWheels(int leftMotorCanId, int rightMotorCanId) {

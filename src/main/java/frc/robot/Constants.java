@@ -20,6 +20,14 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 
 public final class Constants {
+  public static final class NoteAlignConstants {
+    public static final double kP = 0.02;
+    public static final double kI = 0;
+    public static final double kD = 0;
+
+    public static final double kTolerance = 1;
+  }
+
   public static final class HeadingAlignConstants {
     public static final double kP = 0.01;
     public static final double kI = 0;
@@ -86,7 +94,7 @@ public final class Constants {
     public static final String kRearCameraName = "rearCamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center. = new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0)
     public static final Transform3d kRearRobotToCam =
-      new Transform3d(new Translation3d(-0.267, 0.0, 0.457), new Rotation3d(0, 0.350, 3.142));
+      new Transform3d(new Translation3d(0.2286, 0.0, 0.4953), new Rotation3d(0, 0.314159, Math.PI));//(0, 0.350, 3.142));
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout =
@@ -101,7 +109,7 @@ public final class Constants {
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 4.2;
+    public static final double kMaxSpeedMetersPerSecond = 4.0;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     public static final double kDirectionSlewRate = 1.2; // radians per second
@@ -189,7 +197,7 @@ public final class Constants {
     public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
 
     public static final int kDrivingMotorCurrentLimit = 80; // amps
-    public static final int kTurningMotorCurrentLimit = 60; // amps
+    public static final int kTurningMotorCurrentLimit = 30; // amps
   }
 
   public static final class OIConstants {

@@ -11,7 +11,7 @@ import frc.robot.Constants.IntakeConstants;
 
 
 public class Intake extends SubsystemBase { 
-    private final IntakePivot m_intakePivot;
+    public final IntakePivot m_intakePivot;
     private final IntakeRollers m_intakeRollers;
     private final DigitalInput m_noteLimitSwitch;
 
