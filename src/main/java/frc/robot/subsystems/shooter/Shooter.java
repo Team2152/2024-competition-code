@@ -22,7 +22,7 @@ public class Shooter extends SubsystemBase {
         m_shooterPivot = new ShooterPivot(ShooterConstants.kPivotCanId,62.91);
         m_feederWheels = new FeederWheels(ShooterConstants.kLeftFeederCanId, ShooterConstants.kRightFeederCanId);
         m_shooterWheels = new ShooterWheels(ShooterConstants.kLeftShooterCanId, ShooterConstants.kRightShooterCanId);
-        m_limitSwitch = new DigitalInput(9);
+        m_limitSwitch = new DigitalInput(6);
     }
 
     @Override

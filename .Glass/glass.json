@@ -12,6 +12,7 @@
     },
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Differential Drive": "DifferentialDrive",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/SendableChooser[0]": "String Chooser"
     },
@@ -26,7 +27,8 @@
   },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
-    "serverTeam": "2152"
+    "serverTeam": "2152",
+    "visible": false
   },
   "Plots": {
     "Plot <0>": {
